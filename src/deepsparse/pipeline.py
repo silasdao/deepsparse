@@ -198,10 +198,7 @@ class Pipeline(BasePipeline):
 
         self.onnx_file_path = self.setup_onnx_file_path()
 
-        if _delay_engine_initialize:
-            self.engine = None
-        else:
-            self.engine = self._initialize_engine()
+        self.engine = None if _delay_engine_initialize else self._initialize_engine()
         self._batch_size = self._batch_size or 1
 
         self.log(
@@ -453,12 +450,11 @@ class Pipeline(BasePipeline):
                 "task"
             )
 
-        # parse any additional properties as kwargs
-        kwargs = {}
-        for attr_name, attr in self.__class__.__dict__.items():
-            if isinstance(attr, property) and attr_name not in dir(PipelineConfig):
-                kwargs[attr_name] = getattr(self, attr_name)
-
+        kwargs = {
+            attr_name: getattr(self, attr_name)
+            for attr_name, attr in self.__class__.__dict__.items()
+            if isinstance(attr, property) and attr_name not in dir(PipelineConfig)
+        }
         return PipelineConfig(
             task=self.task,
             model_path=self.model_path_orig,
@@ -541,14 +537,14 @@ class Pipeline(BasePipeline):
         """
         :return: Unambiguous representation of the current pipeline
         """
-        return "{}({})".format(self.__class__, self._properties_dict())
+        return f"{self.__class__}({self._properties_dict()})"
 
     def __str__(self):
         """
         :return: Human readable form of the current pipeline
         """
         formatted_props = [
-            "\t{}: {}".format(key, val) for key, val in self._properties_dict().items()
+            f"\t{key}: {val}" for key, val in self._properties_dict().items()
         ]
 
         return "{}.{}:\n{}".format(
@@ -796,8 +792,7 @@ def _initialize_executor_and_workers(
 
     if batch_size is None and executor is None:
         raise ValueError(
-            "Must have an ThreadPoolExecutor for running in dynamic batch mode "
-            f"but got {None}"
+            'Must have an ThreadPoolExecutor for running in dynamic batch mode but got None'
         )
 
     return executor, num_async_workers

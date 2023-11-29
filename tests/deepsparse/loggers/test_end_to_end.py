@@ -52,7 +52,7 @@ LOGGER = logger_from_config(
 def test_end_to_end(mock_engine, config):
     pipeline = Pipeline.create("text_classification", logger=config)
     no_iterations = 10
-    for i in range(no_iterations):
+    for _ in range(no_iterations):
         pipeline("today is great")
         time.sleep(0.1)  # sleeping to make sure all the logs are collected
 

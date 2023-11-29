@@ -63,18 +63,15 @@ class TestMultiModelEngineParametrized:
         models = list(model_test_registry.values())
         batch_size = 1
         context = Context(num_streams=num_streams)
-        model_index = 0
-        threads = list()
+        threads = []
 
-        for i in range(num_requests):
+        for model_index, _ in enumerate(range(num_requests)):
             thread = Thread(
                 target=self.thread_function,
                 args=(models[model_index % len(models)], batch_size, context),
             )
             thread.start()
             threads.append(thread)
-            model_index += 1
-
         for thread in threads:
             thread.join()
 

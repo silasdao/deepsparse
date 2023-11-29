@@ -251,9 +251,9 @@ def layer_info_to_string(li, format_str):
     else:
         return format_str.format(
             li["name"],
-            "{}".format(list(li["output_dims"].values())),
-            "{}".format(list(li["kernel_dims"].values())),
-            "{}".format(list(li["strides"].values())),
+            f'{list(li["output_dims"].values())}',
+            f'{list(li["kernel_dims"].values())}',
+            f'{list(li["strides"].values())}',
             li["activation_sparsity"],
             li["average_run_time_in_ms"],
             li["average_utilization"] * 100.0,
@@ -281,8 +281,8 @@ def construct_layer_table(result):
 
     table_str += "Total Time(MS): {:05f}\n".format(result["average_total_time"])
     table_str += "Items per second: {:05f}\n".format(result["items_per_second"])
-    table_str += "Batch Size: {}\n".format(result["batch_size"])
-    table_str += "Number of threads: {}\n".format(result["num_threads"])
+    table_str += f'Batch Size: {result["batch_size"]}\n'
+    table_str += f'Number of threads: {result["num_threads"]}\n'
 
     return table_str
 
@@ -308,8 +308,7 @@ def process_line_item(total_layer_time, detailed_layer_time, li, strip_name):
 
     # Record detailed layer types as well
     if "kernel_dims" in li:
-        kerdims = list(li["kernel_dims"].values())
-        if kerdims:
+        if kerdims := list(li["kernel_dims"].values()):
             detailed_layer_type = f"{layer_type}|kernel={kerdims}"
             if detailed_layer_type in detailed_layer_time:
                 detailed_layer_time[detailed_layer_type] += avg_layer_time
@@ -329,11 +328,13 @@ def construct_layer_statistics(result):
                 process_line_item(total_layer_time, detailed_layer_time, sli, False)
 
     summed_total_time = 0.0
-    for k, v in total_layer_time.items():
+    for v in total_layer_time.values():
         summed_total_time += v
 
-    perc_str = "== Layer Breakdown ==\n"
-    perc_str += "Name                           | Summed Time | Percent Taken\n"
+    perc_str = (
+        "== Layer Breakdown ==\n"
+        + "Name                           | Summed Time | Percent Taken\n"
+    )
     for name, val in total_layer_time.items():
         # Print summary for this type of layer
         perc_str += "{:30} | {:8.3f}    | {:4.2f}%\n".format(

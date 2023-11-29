@@ -38,8 +38,7 @@ def is_server_up(url: str) -> bool:
 
 def wait_for_server(url: str, retries: int, interval: int = 1) -> bool:
     for _ in range(retries):
-        is_up = is_server_up(url)
-        if is_up:
+        if is_up := is_server_up(url):
             print(f"server up and ready in ~{_} seconds...")
             return True
         time.sleep(interval)

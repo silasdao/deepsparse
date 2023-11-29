@@ -250,8 +250,7 @@ class NLDecoderEngine:
         for idx, input_name in enumerate(self.onnx_input_names_no_cache):
             kv_cache_state[input_name] = inp[idx]
 
-        new_inp = [kv_cache_state[name] for name in self.engine.input_names]
-        return new_inp
+        return [kv_cache_state[name] for name in self.engine.input_names]
 
     def update_kv_cache(
         self,
@@ -274,10 +273,7 @@ class NLDecoderEngine:
             kv_cache.total_num_processed_tokens += input_ids_len
             return
 
-        kv_cache_state = {
-            name: array
-            for name, array in zip(self.onnx_input_names_cached, kv_cache_state)
-        }
+        kv_cache_state = dict(zip(self.onnx_input_names_cached, kv_cache_state))
 
         kv_cache.update(
             state=kv_cache_state,

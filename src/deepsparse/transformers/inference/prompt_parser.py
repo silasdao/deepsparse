@@ -31,13 +31,11 @@ class UnableToParseExtentsonException(Exception):
 def parse_value_to_appropriate_type(value: str):
     if value.isdigit():
         return int(value)
-    if "." in str(value) and all(part.isdigit() for part in value.split(".", 1)):
+    if "." in value and all(part.isdigit() for part in value.split(".", 1)):
         return float(value)
     if value.lower() == "true":
         return True
-    if value.lower() == "false":
-        return False
-    return value
+    return False if value.lower() == "false" else value
 
 
 class PromptParser:
@@ -76,7 +74,7 @@ class PromptParser:
             reader = csv.DictReader(file)
             for row in reader:
                 for key, value in row.items():
-                    kwargs.update({key: parse_value_to_appropriate_type(value)})
+                    kwargs[key] = parse_value_to_appropriate_type(value)
                 yield kwargs
 
     def _parse_json_list(self, **kwargs):

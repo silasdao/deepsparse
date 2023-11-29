@@ -89,9 +89,7 @@ def parse_json_callback(ctx, params, value: str) -> Dict:
     :return: The parsed dictionary
     """
     # JSON string -> dict Callback
-    if isinstance(value, str):
-        return json.loads(value)
-    return value
+    return json.loads(value) if isinstance(value, str) else value
 
 
 @click.command()

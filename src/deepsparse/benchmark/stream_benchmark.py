@@ -97,11 +97,10 @@ def multistream_benchmark(
 ) -> List[float]:
     time_queue = queue.Queue()
     max_time = time.perf_counter() + seconds_to_run
-    threads = []
-
-    for thread in range(num_streams):
-        threads.append(EngineExecutorThread(model, input_list, time_queue, max_time))
-
+    threads = [
+        EngineExecutorThread(model, input_list, time_queue, max_time)
+        for _ in range(num_streams)
+    ]
     for thread in threads:
         thread.start()
 
@@ -130,19 +129,14 @@ def model_stream_benchmark(
 
     # Run the benchmark scenario and collect batch times. The engine will be warmed up
     # for a few seconds first using "seconds_to_warmup"
-    if scenario == "singlestream":
+    if scenario in {"multistream", "elastic"}:
+        multistream_benchmark(model, input_list, seconds_to_warmup, num_streams)
+        batch_times = multistream_benchmark(
+            model, input_list, seconds_to_run, num_streams
+        )
+    elif scenario == "singlestream":
         singlestream_benchmark(model, input_list, seconds_to_warmup)
         batch_times = singlestream_benchmark(model, input_list, seconds_to_run)
-    elif scenario == "multistream":
-        multistream_benchmark(model, input_list, seconds_to_warmup, num_streams)
-        batch_times = multistream_benchmark(
-            model, input_list, seconds_to_run, num_streams
-        )
-    elif scenario == "elastic":
-        multistream_benchmark(model, input_list, seconds_to_warmup, num_streams)
-        batch_times = multistream_benchmark(
-            model, input_list, seconds_to_run, num_streams
-        )
     else:
         raise Exception(f"Unknown scenario '{scenario}'")
 
@@ -172,7 +166,7 @@ def model_stream_benchmark(
     percentiles_dict = {
         "{:2.1f}%".format(key): value for key, value in zip(percentiles, buckets)
     }
-    benchmark_dict = {
+    return {
         "scenario": scenario,
         "items_per_sec": items_per_sec,
         "seconds_ran": total_time_executing,
@@ -182,7 +176,6 @@ def model_stream_benchmark(
         "std": numpy.std(batch_times_ms),
         **percentiles_dict,
     }
-    return benchmark_dict
 
 
 def _adjust_input_list_for_internal_kv_cache(input_list, input_names):

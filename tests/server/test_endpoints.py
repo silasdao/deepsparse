@@ -45,10 +45,7 @@ def parse(value) -> int:
 class TestStatusEndpoints:
     @pytest.fixture(scope="class")
     def server_config(self):
-        server_config = ServerConfig(
-            num_cores=1, num_workers=1, endpoints=[], loggers={}
-        )
-        yield server_config
+        yield ServerConfig(num_cores=1, num_workers=1, endpoints=[], loggers={})
 
     @pytest.fixture(scope="class")
     def client(self, server_config):
@@ -80,10 +77,7 @@ class TestStatusEndpoints:
 class TestMockEndpoints:
     @pytest.fixture(scope="class")
     def server_config(self):
-        server_config = ServerConfig(
-            num_cores=1, num_workers=1, endpoints=[], loggers={}
-        )
-        yield server_config
+        yield ServerConfig(num_cores=1, num_workers=1, endpoints=[], loggers={})
 
     @pytest.fixture(scope="class")
     def server(self, server_config):

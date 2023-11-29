@@ -103,7 +103,7 @@ def test_prometheus_logger(
         text_log_save_dir=tmp_path,
     )
 
-    for idx in range(no_iterations):
+    for _ in range(no_iterations):
         if should_fail:
             with pytest.raises(ValueError):
                 logger.log(identifier, value, MetricCategories.DATA)

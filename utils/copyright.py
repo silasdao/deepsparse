@@ -133,9 +133,10 @@ def _get_files(patterns: List[str]) -> List[str]:
     files = []
 
     for pattern in patterns:
-        for file in glob.glob(pattern, recursive=True):
-            files.append(os.path.abspath(os.path.expanduser(file)))
-
+        files.extend(
+            os.path.abspath(os.path.expanduser(file))
+            for file in glob.glob(pattern, recursive=True)
+        )
     files.sort()
 
     return files
@@ -208,13 +209,12 @@ def _file_copyright(file_type: str) -> str:
     if comment_formatting.block_prefix:
         lines.append(comment_formatting.block_prefix)
 
-    for line in COPYRIGHT_LINES:
-        lines.append(
-            f"{comment_formatting.line_prefix} {line}"
-            if comment_formatting.line_prefix
-            else line
-        )
-
+    lines.extend(
+        f"{comment_formatting.line_prefix} {line}"
+        if comment_formatting.line_prefix
+        else line
+        for line in COPYRIGHT_LINES
+    )
     if comment_formatting.block_suffix:
         lines.append(comment_formatting.block_suffix)
 
@@ -252,7 +252,7 @@ def _file_header_info(lines: List[str], file_type: str) -> _HeaderInfo:
             # empty line, record the state of new lines before and after header
             if not prefix_found:
                 new_line_before = True
-            elif prefix_found and (suffix_found or not comment_formatting.block_suffix):
+            elif suffix_found or not comment_formatting.block_suffix:
                 new_line_after = True
         elif (
             comment_formatting.block_prefix
@@ -298,9 +298,9 @@ _CommentFormatting = NamedTuple(
 def _code_comment_formatting(file_type: str) -> _CommentFormatting:
     if file_type == "python":
         return _CommentFormatting("#", "", "")
-    elif file_type == "html" or file_type == "markdown":
+    elif file_type in {"html", "markdown"}:
         return _CommentFormatting("", "<!--", "-->")
-    elif file_type == "css" or file_type == "javascript":
+    elif file_type in {"css", "javascript"}:
         return _CommentFormatting("", "/*", "*/")
     elif file_type == "restructuredtext":
         return _CommentFormatting("   ", "..", "")

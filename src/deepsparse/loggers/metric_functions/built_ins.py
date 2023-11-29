@@ -54,15 +54,14 @@ def predicted_classes(
     :param classes: The classes to convert to a BatchResult
     """
 
-    if isinstance(classes[0], list):
-        result = BatchResult()
-        for class_ in classes:
-            result.append(
-                BatchResult([_check_if_convertable_to_int(value) for value in class_])
-            )
-        return result
-    else:
+    if not isinstance(classes[0], list):
         return BatchResult([_check_if_convertable_to_int(value) for value in classes])
+    result = BatchResult()
+    for class_ in classes:
+        result.append(
+            BatchResult([_check_if_convertable_to_int(value) for value in class_])
+        )
+    return result
 
 
 @register_metric_function(
@@ -84,13 +83,12 @@ def predicted_top_score(
 
     :param scores: The scores to convert to a BatchResult
     """
-    if isinstance(scores[0], list):
-        result = BatchResult()
-        for scores_ in scores:
-            result.append(max(scores_))
-        return result
-    else:
+    if not isinstance(scores[0], list):
         return max(scores)
+    result = BatchResult()
+    for scores_ in scores:
+        result.append(max(scores_))
+    return result
 
 
 def _check_if_convertable_to_int(value):

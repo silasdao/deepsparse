@@ -168,7 +168,7 @@ class BenchmarkResults(Iterable):
         :return: Human readable form of the benchmark summary
         """
         formatted_props = [
-            "\t{}: {}".format(key, val) for key, val in self._properties_dict.items()
+            f"\t{key}: {val}" for key, val in self._properties_dict.items()
         ]
         return "{}:\n{}".format(
             self.__class__.__name__,
@@ -182,8 +182,7 @@ class BenchmarkResults(Iterable):
         return self._results[index]
 
     def __iter__(self) -> Iterator[BatchBenchmarkResult]:
-        for result in self._results:
-            yield result
+        yield from self._results
 
     @property
     def _properties_dict(self) -> Dict:
@@ -214,9 +213,7 @@ class BenchmarkResults(Iterable):
         """
         :return: the number of items across all batches that have been added
         """
-        num_items = sum([res.batch_size for res in self._results])
-
-        return num_items
+        return sum(res.batch_size for res in self._results)
 
     @property
     def batch_times(self) -> List[float]:

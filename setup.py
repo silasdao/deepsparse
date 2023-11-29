@@ -52,16 +52,15 @@ _PACKAGE_NAME = (
 
 if is_enterprise:
     license = "Apache"
-else:
-    license = "Neural Magic DeepSparse Community License, Apache"
-
-if is_enterprise:
     # do not include the LICENSE-NEURALMAGIC file
     # in the deepsparse-ent installation folder
     license_nm_path = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), "LICENSE-NEURALMAGIC"
     )
     os.remove(license_nm_path)
+
+else:
+    license = "Neural Magic DeepSparse Community License, Apache"
 
 # File regexes for binaries to include in package_data
 binary_regexes = ["*/*.so", "*/*.so.*", "*.bin", "*/*.bin", "*/*.dylib"]
@@ -240,7 +239,7 @@ class OverrideInstall(install):
         mode = 0o755
         for filepath in self.get_outputs():
             if any(fnmatch(filepath, regex) for regex in binary_regexes):
-                log.info("changing mode of %s to %s" % (filepath, oct(mode)))
+                log.info(f"changing mode of {filepath} to {oct(mode)}")
                 os.chmod(filepath, mode)
 
 

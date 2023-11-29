@@ -201,7 +201,7 @@ class Server:
 
     def clean_up_route(self, route):
         if not route.startswith("/"):
-            route = "/" + route
+            route = f"/{route}"
         if route.endswith("/"):
             route = route[:-1]
         return route
@@ -247,8 +247,7 @@ class Server:
         raw_request: Request,
     ):
         pipeline_outputs = proxy_pipeline.pipeline(**await raw_request.json())
-        server_logger = proxy_pipeline.pipeline.logger
-        if server_logger:
+        if server_logger := proxy_pipeline.pipeline.logger:
             log_system_information(
                 server_logger=server_logger, system_logging_config=system_logging_config
             )
@@ -264,8 +263,7 @@ class Server:
             (file.file for file in request), from_server=True
         )
         pipeline_outputs = proxy_pipeline.pipeline(request)
-        server_logger = proxy_pipeline.pipeline.logger
-        if server_logger:
+        if server_logger := proxy_pipeline.pipeline.logger:
             log_system_information(
                 server_logger=server_logger, system_logging_config=system_logging_config
             )

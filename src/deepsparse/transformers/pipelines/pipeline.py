@@ -172,7 +172,7 @@ class TransformersPipeline(Pipeline, Bucketable):
         """
         if onnx_input_names is None:
             onnx_input_names = self.onnx_input_names
-        if not all(name in tokens for name in onnx_input_names):
+        if any(name not in tokens for name in onnx_input_names):
             raise ValueError(
                 f"pipeline expected arrays with names {onnx_input_names}, "
                 f"received inputs: {list(tokens.keys())}"
@@ -220,12 +220,12 @@ class TransformersPipeline(Pipeline, Bucketable):
             length. If no pipeline fits the input, the pipeline with the largest
             sequence length is returned
         """
-        valid_pipelines = [
+        if valid_pipelines := [
             bucket for bucket in buckets if bucket.sequence_length >= input_seq_len
-        ]
-        if len(valid_pipelines) == 0:
+        ]:
+            return min(valid_pipelines, key=lambda bucket: bucket.sequence_length)
+        else:
             return max(buckets, key=lambda bucket: bucket.sequence_length)
-        return min(valid_pipelines, key=lambda bucket: bucket.sequence_length)
 
 
 def pipeline(

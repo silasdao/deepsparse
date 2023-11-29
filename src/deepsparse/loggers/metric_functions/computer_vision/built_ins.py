@@ -93,7 +93,7 @@ def mean_pixels_per_channel(
     dims = numpy.arange(0, num_dims, 1)
     dims = numpy.delete(dims, channel_dim)
     means = numpy.mean(img_numpy, axis=tuple(dims))
-    keys = ["channel_{}".format(i) for i in range(len(means))]
+    keys = [f"channel_{i}" for i in range(len(means))]
     return dict(zip(keys, means))
 
 
@@ -118,7 +118,7 @@ def std_pixels_per_channel(
     dims = numpy.arange(0, num_dims, 1)
     dims = numpy.delete(dims, channel_dim)
     stds = tuple(numpy.std(img_numpy, axis=tuple(dims)))
-    keys = ["channel_{}".format(i) for i in range(len(stds))]
+    keys = [f"channel_{i}" for i in range(len(stds))]
     return dict(zip(keys, stds))
 
 
@@ -278,7 +278,7 @@ def _check_valid_image(img: numpy.ndarray) -> Tuple[int, int]:
     if num_dims == 4:
         img = img[0]
 
-    channel_dim = [i for i, dim in enumerate(img.shape) if (dim == 1) or (dim == 3)]
+    channel_dim = [i for i, dim in enumerate(img.shape) if dim in [1, 3]]
 
     if img.ndim != 3:
         raise ValueError(

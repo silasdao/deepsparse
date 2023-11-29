@@ -191,8 +191,7 @@ def generate_session_id() -> str:
     Generate uuid for session id. This is used to
     identify the kv cache session for the user
     """
-    session_id = str(uuid.uuid4())
-    return session_id
+    return str(uuid.uuid4())
 
 
 def process_generation_config(

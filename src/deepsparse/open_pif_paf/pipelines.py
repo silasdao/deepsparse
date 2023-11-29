@@ -136,14 +136,12 @@ class OpenPifPafPipeline(Pipeline):
             format of this pipeline
         """
         if self.return_cifcaf_fields:
-            batch_fields = []
-            for cif, caf in zip(*fields):
-                batch_fields.append([cif, caf])
+            batch_fields = [[cif, caf] for cif, caf in zip(*fields)]
             return OpenPifPafFields(fields=batch_fields)
 
         data_batch, skeletons_batch, scores_batch, keypoints_batch = [], [], [], []
 
-        for idx, (cif, caf) in enumerate(zip(*fields)):
+        for cif, caf in zip(*fields):
             annotations = self.processor._mappable_annotations(
                 [torch.tensor(cif), torch.tensor(caf)], None, None
             )

@@ -236,14 +236,13 @@ class TokenClassificationPipeline(TransformersPipeline):
             )
 
         if args:
-            if len(args) == 1:
-                # passed input_schema schema directly
-                if isinstance(args[0], self.input_schema):
-                    return args[0]
-                return self.input_schema(inputs=args[0])
-            else:
+            if len(args) != 1:
                 return self.input_schema(inputs=args)
 
+            # passed input_schema schema directly
+            if isinstance(args[0], self.input_schema):
+                return args[0]
+            return self.input_schema(inputs=args[0])
         return self.input_schema(**kwargs)
 
     def process_inputs(
@@ -469,14 +468,13 @@ class TokenClassificationPipeline(TransformersPipeline):
             raise ValueError(
                 f"Invalid aggregation_strategy: {self._aggregation_strategy}"
             )
-        new_entity = {
+        return {
             "entity": entity,
             "score": score,
             "word": word,
             "start": entities[0]["start"],
             "end": entities[-1]["end"],
         }
-        return new_entity
 
     def _aggregate_words(self, entities: List[dict]) -> List[dict]:
         word_entities = []
@@ -499,14 +497,13 @@ class TokenClassificationPipeline(TransformersPipeline):
         scores = numpy.nanmean([entity["score"] for entity in entities])
         tokens = [entity["word"] for entity in entities]
 
-        entity_group = {
+        return {
             "entity_group": entity,
             "score": numpy.mean(scores),
             "word": self.tokenizer.convert_tokens_to_string(tokens),
             "start": entities[0]["start"],
             "end": entities[-1]["end"],
         }
-        return entity_group
 
     def _get_tag(self, entity_name: str) -> Tuple[str, str]:
         if entity_name.startswith("B-"):

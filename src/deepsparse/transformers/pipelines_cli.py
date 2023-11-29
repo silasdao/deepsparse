@@ -192,8 +192,7 @@ def _parse_args() -> argparse.Namespace:
         default="out.json",
     )
 
-    _args = parser.parse_args()
-    return _args
+    return parser.parse_args()
 
 
 def cli():

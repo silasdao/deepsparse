@@ -70,7 +70,7 @@ def annotate_image(
         numpy.divide(input_image_resolution, kwargs["model_resolution"])
     )
 
-    if not len(prediction.keypoints) == 1:
+    if len(prediction.keypoints) != 1:
         raise ValueError(
             f"Expecting only one image in the batch, "
             f"received {len(prediction.keypoints)}"
@@ -109,12 +109,7 @@ def _draw_confidence(
     """
     Draw the confidence score of the pose estimation
     """
-    left, top = None, None
-    for coord in data:
-        # find the first valid coordinate
-        if all(coord):
-            left, top = coord
-            break
+    left, top = next((coord for coord in data if all(coord)), (None, None))
     # if no valid coordinates found, return the image as is
     if left is None or top is None:
         return image
@@ -168,7 +163,7 @@ def _draw_skelethon(
         joint_1 = connection[0] - 1
         joint_2 = connection[1] - 1
         keypoint_1, keypoint_2 = data[joint_1], data[joint_2]
-        if all(keypoint_1) is False or all(keypoint_2) is False:
+        if not all(keypoint_1) or not all(keypoint_2):
             continue
         body_part_1_name, body_part_2_name = keypoints[joint_1], keypoints[joint_2]
         color = _get_connection_color(body_part_1_name, body_part_2_name)
@@ -198,9 +193,10 @@ def _get_connection_color(
     if "_" in body_part_name2:
         body_part_name2 = body_part_name2.split("_")[-1]
 
-    color = body_part_color_dict.get(body_part_name1 + "_" + body_part_name2)
+    color = body_part_color_dict.get(f"{body_part_name1}_{body_part_name2}")
     if color is None:
         color = body_part_color_dict.get(
-            body_part_name2 + "_" + body_part_name1, body_part_color_dict["other"]
+            f"{body_part_name2}_{body_part_name1}",
+            body_part_color_dict["other"],
         )
     return color

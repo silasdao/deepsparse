@@ -45,11 +45,7 @@ def lambda_handler(event, context):
     strings = response["Body"].read().decode("utf-8")
     strings = strings.split("\n")
 
-    string_data = []
-    for row in strings:
-        if row:
-            string_data.append(row)
-
+    string_data = [row for row in strings if row]
     response = batch_client.submit_job(
         jobName="batch-job",
         jobQueue="deepsparse-batch",

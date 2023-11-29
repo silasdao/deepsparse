@@ -96,27 +96,26 @@ def parse_params(configs_directory: str) -> List[Dict[str, Any]]:
 
     config_dicts = []
     for file in os.listdir(configs_directory):
-        if file.endswith(".yaml"):
-            config_path = os.path.join(configs_directory, file)
-            # reads the yaml file
-            with open(config_path, "r") as f:
-                config = yaml.safe_load(f)
-
-            cadence = os.environ.get("CADENCE", "commit")
-            expected_cadence = config["cadence"]
-
-            if not isinstance(expected_cadence, list):
-                expected_cadence = [expected_cadence]
-            if cadence in expected_cadence:
-                config_dicts.append(config)
-            else:
-                logging.info(
-                    f"Skipping testing model: {config['model_path']} "
-                    f"for cadence: {config['cadence']}"
-                )
-        else:
+        if not file.endswith(".yaml"):
             raise FileNotFoundError(
                 f"Could not find a yaml file in {configs_directory}"
+            )
+        config_path = os.path.join(configs_directory, file)
+        # reads the yaml file
+        with open(config_path, "r") as f:
+            config = yaml.safe_load(f)
+
+        cadence = os.environ.get("CADENCE", "commit")
+        expected_cadence = config["cadence"]
+
+        if not isinstance(expected_cadence, list):
+            expected_cadence = [expected_cadence]
+        if cadence in expected_cadence:
+            config_dicts.append(config)
+        else:
+            logging.info(
+                f"Skipping testing model: {config['model_path']} "
+                f"for cadence: {config['cadence']}"
             )
     return config_dicts
 

@@ -43,10 +43,7 @@ endpoint_path = f"/v2/models/{name}/infer"
 
 def _test_logger_contents(leaf_logger, expected_logs):
     for expected_log_content in list(expected_logs.keys()):
-        i = 0
-        for log in leaf_logger.calls:
-            if expected_log_content in log:
-                i += 1
+        i = sum(1 for log in leaf_logger.calls if expected_log_content in log)
         assert expected_logs[expected_log_content] == i
 
 

@@ -101,15 +101,15 @@ def logger_from_config(config: str, pipeline_identifier: str = None) -> BaseLogg
     config = yaml.safe_load(config)
     config = PipelineLoggingConfig(**config)
 
-    logger = build_logger(
-        system_logging_config=system_logging_config_to_groups(config.system_logging),
+    return build_logger(
+        system_logging_config=system_logging_config_to_groups(
+            config.system_logging
+        ),
         loggers_config=config.loggers,
         data_logging_config=possibly_modify_target_identifiers(
             config.data_logging, pipeline_identifier
         ),
     )
-
-    return logger
 
 
 def build_logger(
@@ -192,14 +192,12 @@ def get_target_identifier(
         # and we don't need to add the endpoint name to it
         return target_name
     if pipeline_identifier:
-        # if pipeline_identifier specified,
-        # prepend it to the target name
-        if target_name == "":
-            # if target name is an empty string, return the pipeline identifier
-            return pipeline_identifier
-        else:
+        if target_name:
             # otherwise, return the pipeline identifier and the target name
             return f"{pipeline_identifier}/{target_name}"
+        else:
+            # if target name is an empty string, return the pipeline identifier
+            return pipeline_identifier
     return target_name
 
 
@@ -232,7 +230,7 @@ def build_leaf_loggers(
                 )
             logger_arguments = {} if logger_arguments is None else logger_arguments
             leaf_logger = logger_to_instantiate(**logger_arguments)
-        loggers.update({logger_name: leaf_logger})
+        loggers[logger_name] = leaf_logger
     return loggers
 
 
@@ -268,10 +266,10 @@ def build_data_loggers(
             # name
             continue
 
-        for metric_function in metric_functions:
-            data_loggers.append(
-                _build_function_logger(metric_function, target_identifier, loggers)
-            )
+        data_loggers.extend(
+            _build_function_logger(metric_function, target_identifier, loggers)
+            for metric_function in metric_functions
+        )
     _validate_data_loggers(data_loggers)
     return data_loggers
 
@@ -293,19 +291,18 @@ def build_system_loggers(
     if not system_logging_config:
         return system_loggers
 
-    for config_group_name, config_group_args in system_logging_config.items():
-        system_loggers.append(
-            _build_function_logger(
-                metric_function_cfg=MetricFunctionConfig(
-                    func="identity",
-                    frequency=1,
-                    target_loggers=config_group_args.target_loggers,
-                ),
-                target_identifier=config_group_name,
-                loggers=loggers,
-            )
+    system_loggers.extend(
+        _build_function_logger(
+            metric_function_cfg=MetricFunctionConfig(
+                func="identity",
+                frequency=1,
+                target_loggers=config_group_args.target_loggers,
+            ),
+            target_identifier=config_group_name,
+            loggers=loggers,
         )
-
+        for config_group_name, config_group_args in system_logging_config.items()
+    )
     _LOGGER.info(
         "System Logging: enabled for groups: %s", list(system_logging_config.keys())
     )
@@ -332,7 +329,7 @@ def check_from_predefined(target: str) -> Tuple[bool, Optional[str]]:
     elif len(target_split) == 2 and target_split[1] == FROM_PREDEFINED:
         return True, target_split[0]
     else:
-        if any([substring == FROM_PREDEFINED for substring in target_split]):
+        if FROM_PREDEFINED in target_split:
             raise ValueError(
                 "Invalid target name. Cannot have `from_predefined` "
                 "in the middle of the target name"
@@ -454,7 +451,7 @@ def system_logging_config_to_groups(
             target_name=config_group_name, pipeline_identifier=endpoint_name
         )
 
-        system_logging_groups.update({config_group_name: config_group_data})
+        system_logging_groups[config_group_name] = config_group_data
 
     return system_logging_groups
 
@@ -501,10 +498,10 @@ def _build_function_logger_from_predefined(
         target_identifier,
         metric_functions,
     ) in data_logging_config_from_predefined.items():
-        for metric_function in metric_functions:
-            data_loggers.append(
-                _build_function_logger(metric_function, target_identifier, loggers)
-            )
+        data_loggers.extend(
+            _build_function_logger(metric_function, target_identifier, loggers)
+            for metric_function in metric_functions
+        )
     return data_loggers
 
 

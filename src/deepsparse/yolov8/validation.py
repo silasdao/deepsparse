@@ -125,7 +125,7 @@ def main(
         )
     if dataset_path is not None:
         args.data = data_from_dataset_path(args.data, dataset_path)
-    classes = {label: class_ for (label, class_) in enumerate(COCO_CLASSES)}
+    classes = dict(enumerate(COCO_CLASSES))
 
     if subtask == "detection":
         validator = DeepSparseDetectionValidator(pipeline=pipeline, args=args)

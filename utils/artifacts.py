@@ -143,7 +143,7 @@ def download_wand_binaries(package_path: str, full_version: str, is_release: boo
         if member.name is base_tar_dir:
             continue
         # Remove base folder from each member
-        member.name = member.name.replace(base_tar_dir + "/", "")
+        member.name = member.name.replace(f"{base_tar_dir}/", "")
         tar.extract(member, package_path)
 
 

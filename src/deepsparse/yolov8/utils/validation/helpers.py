@@ -99,7 +99,7 @@ def check_coco128_segmentation(args: argparse.Namespace):
     """
     if args.data == "coco128.yaml":
         dataset_name, dataset_extension = os.path.splitext(args.data)
-        dataset_yaml = dataset_name + "-seg" + dataset_extension
+        dataset_yaml = f"{dataset_name}-seg{dataset_extension}"
         warnings.warn(
             f"Dataset yaml {dataset_yaml} is not supported for segmentation. "
             f"Attempting to use {dataset_yaml} instead."

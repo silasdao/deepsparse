@@ -95,9 +95,9 @@ class Scheduler(Enum):
 
     @staticmethod
     def from_str(key: str):
-        if key in ("sync", "single", "single_stream"):
+        if key in {"sync", "single", "single_stream"}:
             return Scheduler.single_stream
-        elif key in ("async", "multi", "multi_stream"):
+        elif key in {"async", "multi", "multi_stream"}:
             return Scheduler.multi_stream
         elif key in ("elastic"):
             return Scheduler.elastic
@@ -132,14 +132,10 @@ def _validate_num_streams(num_streams: Union[None, int], num_cores: int) -> int:
         raise ValueError("num_streams must be greater than 0")
 
     max_num_streams = NUM_CORES
-    if max_num_streams > num_cores:
-        max_num_streams = num_cores
-
+    max_num_streams = min(max_num_streams, num_cores)
     if num_streams > max_num_streams:
         num_streams = max_num_streams
-        _LOGGER.warn(
-            "num_streams exceeds num_cores - capping to {}".format(num_streams)
-        )
+        _LOGGER.warn(f"num_streams exceeds num_cores - capping to {num_streams}")
 
     return num_streams
 
@@ -153,7 +149,7 @@ def _validate_scheduler(scheduler: Union[None, str, Scheduler]) -> Scheduler:
 
     if not isinstance(scheduler, Scheduler):
         raise ValueError(
-            "unsupported type for scheduler: {} ({})".format(scheduler, type(scheduler))
+            f"unsupported type for scheduler: {scheduler} ({type(scheduler)})"
         )
 
     return scheduler
@@ -361,14 +357,14 @@ class Engine(BaseEngine):
         """
         :return: Unambiguous representation of the current model instance
         """
-        return "{}({})".format(self.__class__, self._properties_dict())
+        return f"{self.__class__}({self._properties_dict()})"
 
     def __str__(self):
         """
         :return: Human readable form of the current model instance
         """
         formatted_props = [
-            "\t{}: {}".format(key, val) for key, val in self._properties_dict().items()
+            f"\t{key}: {val}" for key, val in self._properties_dict().items()
         ]
 
         return "{}.{}:\n{}".format(
@@ -589,9 +585,7 @@ class Engine(BaseEngine):
         if val_inp:
             self._validate_inputs(inp)
 
-        out = self._eng_net.execute(inp)
-
-        return out
+        return self._eng_net.execute(inp)
 
     def benchmark(
         self,
@@ -706,15 +700,12 @@ class Engine(BaseEngine):
 
     def _validate_inputs(self, inp: List[numpy.ndarray]):
         if isinstance(inp, str) or not isinstance(inp, List):
-            raise ValueError("inp must be a list, given {}".format(type(inp)))
+            raise ValueError(f"inp must be a list, given {type(inp)}")
 
         for arr in inp:
             if self._batch_size and arr.shape[0] != self._batch_size:
                 raise ValueError(
-                    (
-                        "array batch size of {} must match the batch size "
-                        "the model was instantiated with {}"
-                    ).format(arr.shape[0], self._batch_size)
+                    f"array batch size of {arr.shape[0]} must match the batch size the model was instantiated with {self._batch_size}"
                 )
 
             if not arr.flags["C_CONTIGUOUS"]:

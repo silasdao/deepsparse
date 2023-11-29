@@ -136,7 +136,7 @@ def test_file_monitoring(delete_mock, post_mock, tmp_path: Path):
     cfg2 = ServerConfig(endpoints=[EndpointConfig(task="a", model="b", route="1")])
     with open(path, "w") as fp:
         yaml.safe_dump(cfg2.dict(), fp)
-    assert next(diffs) == (cfg1, cfg2, path + ".versions/0.yaml")
+    assert next(diffs) == (cfg1, cfg2, f"{path}.versions/0.yaml")
     assert versions_path.exists()
 
     assert next(diffs) is None
@@ -144,7 +144,7 @@ def test_file_monitoring(delete_mock, post_mock, tmp_path: Path):
     cfg3 = ServerConfig(endpoints=[EndpointConfig(task="a", model="c", route="1")])
     with open(path, "w") as fp:
         yaml.safe_dump(cfg3.dict(), fp)
-    assert next(diffs) == (cfg2, cfg3, path + ".versions/1.yaml")
+    assert next(diffs) == (cfg2, cfg3, f"{path}.versions/1.yaml")
 
     all_files = sorted(map(str, tmp_path.rglob("*")))
     all_files = [f.replace(str(tmp_path), "") for f in all_files]

@@ -69,27 +69,28 @@ def get_input_schema_type(pipeline: Pipeline) -> str:
     elif SchemaType.QUESTION in input_schema_requirements:
         return SchemaType.QUESTION
 
-    raise Exception("Unknown schema requirement {}".format(input_schema_requirements))
+    raise Exception(f"Unknown schema requirement {input_schema_requirements}")
 
 
 def get_files_with_suffixes(
     folder: str, num_files: int, recursive: bool, file_endings: Tuple[str]
 ) -> List[str]:
     if not path.exists(folder):
-        raise Exception("Can't parse files, {} does not exist".format(folder))
-    files = []
-    for f in glob.glob(folder + "/**", recursive=recursive):
-        if f.lower().endswith(file_endings):
-            files.append(f)
+        raise Exception(f"Can't parse files, {folder} does not exist")
+    files = [
+        f
+        for f in glob.glob(f"{folder}/**", recursive=recursive)
+        if f.lower().endswith(file_endings)
+    ]
     if len(files) < num_files:
-        raise Exception("Not enough images found in {}".format(folder))
+        raise Exception(f"Not enough images found in {folder}")
     return random.sample(files, num_files)
 
 
 def generate_random_sentence(string_length: int, avg_word_length: int = 5):
     random_chars = "".join(random.choices(string.ascii_letters, k=string_length))
     space_locations = random.sample(
-        range(string_length), int(string_length / avg_word_length)
+        range(string_length), string_length // avg_word_length
     )
     random_chars = list(random_chars)
     for loc in space_locations:
@@ -110,11 +111,10 @@ def generate_random_image_data(
             f"Using default image shape {image_shape}"
         )
 
-    input_data = [
+    return [
         numpy.random.randint(0, high=255, size=image_shape).astype(numpy.uint8)
         for _ in range(batch_size)
     ]
-    return input_data
 
 
 def load_image_data(config: PipelineBenchmarkConfig, batch_size: int) -> List[str]:
@@ -136,11 +136,10 @@ def generate_random_text_data(
         string_length = DEFAULT_STRING_LENGTH
         _LOGGER.warning("Ssing default string length %d" % string_length)
 
-    input_data = [
+    return [
         generate_random_sentence(string_length, avg_word_length=avg_word_len)
         for _ in range(batch_size)
     ]
-    return input_data
 
 
 def load_text_data(config: PipelineBenchmarkConfig, batch_size: int) -> List[str]:

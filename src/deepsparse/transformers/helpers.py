@@ -118,7 +118,7 @@ def overwrite_transformer_onnx_model_inputs(
     # if > 2Gb model is to be modified in-place, operate
     # exclusively on the model graph
     model = onnx.load(path, load_external_data=not inplace)
-    initializer_input_names = set([node.name for node in model.graph.initializer])
+    initializer_input_names = {node.name for node in model.graph.initializer}
     external_inputs = [
         inp for inp in model.graph.input if inp.name not in initializer_input_names
     ]

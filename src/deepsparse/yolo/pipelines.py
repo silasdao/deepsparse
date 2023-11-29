@@ -333,34 +333,28 @@ class YOLOPipeline(Pipeline):
     def _make_channels_first(self, image: numpy.ndarray) -> numpy.ndarray:
         # return a numpy array with channels first
         is_single_image = image.ndim == 3
-        is_batch = image.ndim == 4
-
         if image.shape[-1] != 3:
             return image
 
         if is_single_image:
             return numpy.moveaxis(image, -1, 0)
 
-        if is_batch:
-            return numpy.moveaxis(image, -1, 1)
+        is_batch = image.ndim == 4
 
-        return image
+        return numpy.moveaxis(image, -1, 1) if is_batch else image
 
     def _make_channels_last(self, image: numpy.ndarray) -> numpy.ndarray:
         # return a numpy array with channels first
         is_single_image = image.ndim == 3
-        is_batch = image.ndim == 4
-
         if image.shape[-1] == 3:
             return image
 
         if is_single_image:
             return numpy.moveaxis(image, 0, -1)
 
-        if is_batch:
-            return numpy.moveaxis(image, 1, -1)
+        is_batch = image.ndim == 4
 
-        return image
+        return numpy.moveaxis(image, 1, -1) if is_batch else image
 
     def model_has_postprocessing(self, loaded_onnx_model) -> bool:
         """

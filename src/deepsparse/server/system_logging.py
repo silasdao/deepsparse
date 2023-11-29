@@ -208,11 +208,8 @@ def log_system_information(
             if config_group_name not in system_metric_groups:
                 continue
 
-        # retrieve the function that logs the information for this group
-        logging_func = _PREFIX_MAPPING.get(config_group_name)
-        if not logging_func:
-            continue
-        logging_func(server_logger=server_logger, **items_to_log)
+        if logging_func := _PREFIX_MAPPING.get(config_group_name):
+            logging_func(server_logger=server_logger, **items_to_log)
 
 
 def _send_information_to_logger(

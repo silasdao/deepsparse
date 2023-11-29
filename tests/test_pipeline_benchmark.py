@@ -127,7 +127,7 @@ def test_generate_random_text_data():
     text = text_data[0]
     assert len(text) == 250
     num_spaces = text.count(" ")
-    assert num_spaces == int(len(text) / avg_word_len)
+    assert num_spaces == len(text) // avg_word_len
 
 
 def test_generate_random_question_data():
@@ -141,7 +141,7 @@ def test_generate_random_question_data():
     assert len(context) == config.gen_sequence_length
     num_q_spaces = question.count(" ")
     num_c_spaces = context.count(" ")
-    assert num_q_spaces == num_c_spaces == int(len(question) / avg_word_len)
+    assert num_q_spaces == num_c_spaces == len(question) // avg_word_len
 
 
 @pytest.mark.parametrize(

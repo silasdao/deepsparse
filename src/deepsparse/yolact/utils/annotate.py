@@ -111,10 +111,7 @@ def _put_mask(
         torch.from_numpy(numpy.array(color)).cpu().type(torch.uint8),
         torch.from_numpy(image).cpu(),
     )
-    img_with_non_transparent_masks = cv2.addWeighted(
-        image, 0.3, img_with_mask.numpy(), 0.7, 0
-    )
-    return img_with_non_transparent_masks
+    return cv2.addWeighted(image, 0.3, img_with_mask.numpy(), 0.7, 0)
 
 
 def _put_annotation_text(
@@ -131,8 +128,8 @@ def _put_annotation_text(
 
     image = cv2.rectangle(
         image,
-        (int(left), int(top)),
-        (int(left) + text_width, int(top) + text_height),
+        (left, top),
+        (left + text_width, top + text_height),
         color,
         thickness=-1,
     )
@@ -140,10 +137,10 @@ def _put_annotation_text(
     image = cv2.putText(
         image,
         annotation_text,
-        (int(left), int(top) + text_height),
+        (left, top + text_height),
         cv2.FONT_HERSHEY_SIMPLEX,
         text_font_scale,
-        (255, 255, 255),  # white text
+        (255, 255, 255),
         text_thickness,
         cv2.LINE_AA,
     )

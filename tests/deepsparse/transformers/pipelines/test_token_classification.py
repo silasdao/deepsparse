@@ -56,7 +56,4 @@ def test_aggregation_strategy(
 
 
 def _generate_texts(num_texts):
-    if isinstance(num_texts, int):
-        return ["sample_text"] * num_texts
-    else:
-        return num_texts
+    return ["sample_text"] * num_texts if isinstance(num_texts, int) else num_texts

@@ -312,11 +312,7 @@ def yolo_onnx_has_postprocessing(model_path: Union[str, onnx.ModelProto]) -> boo
         this is assumed to be when the first output of the model has fewer dimensions
         than the other outputs as the grid dimensions have been flattened
     """
-    if isinstance(model_path, str):
-        model = onnx.load(model_path)
-    else:
-        model = model_path
-
+    model = onnx.load(model_path) if isinstance(model_path, str) else model_path
     # get number of dimensions in each output
     outputs_num_dims = [
         len(output.type.tensor_type.shape.dim) for output in model.graph.output

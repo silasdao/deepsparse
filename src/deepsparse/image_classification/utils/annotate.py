@@ -95,7 +95,7 @@ def _put_text(
     cv2.putText(
         img,
         text,
-        (int(x_offset), int(y_offset)),
+        (x_offset, y_offset),
         cv2.FONT_HERSHEY_DUPLEX,
         font_scale,
         text_colour,

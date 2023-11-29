@@ -61,7 +61,8 @@ def bytes_to_arrays(serialized_arr: bytearray) -> List[numpy.array]:
         i_1 = serialized_arr.find(sep, i_0 + 1)
         arr_dtype = numpy.dtype(serialized_arr[i_start:i_0].decode("utf-8"))
         arr_shape = tuple(
-            [int(a) for a in serialized_arr[i_0 + 1 : i_1].decode("utf-8").split(",")]
+            int(a)
+            for a in serialized_arr[i_0 + 1 : i_1].decode("utf-8").split(",")
         )
         arr_num_bytes = numpy.prod(arr_shape) * arr_dtype.itemsize
         arr_str = serialized_arr[i_1 + 1 : arr_num_bytes + (i_1 + 1)]
@@ -136,18 +137,15 @@ def parse_input_shapes(shape_string: str) -> List[List[int]]:
         return None
 
     shapes_list = []
-    if shape_string:
-        matches = re.findall(r"\[(.*?)\],?", shape_string)
-        if matches:
-            for match in matches:
-                # Clean up stray extra brackets
-                value = match.replace("[", "").replace("]", "")
-                # Parse comma-separated dims into shape list
-                shape = [int(s) for s in value.split(",")]
-                shapes_list.append(shape)
-        else:
-            raise Exception(f"Can't parse input shapes parameter: {shape_string}")
+    if not (matches := re.findall(r"\[(.*?)\],?", shape_string)):
+        raise Exception(f"Can't parse input shapes parameter: {shape_string}")
 
+    for match in matches:
+        # Clean up stray extra brackets
+        value = match.replace("[", "").replace("]", "")
+        # Parse comma-separated dims into shape list
+        shape = [int(s) for s in value.split(",")]
+        shapes_list.append(shape)
     return shapes_list
 
 
@@ -162,8 +160,7 @@ def numpy_softmax(x: numpy.ndarray, axis: int = 0):
     x_max = numpy.max(x, axis=axis, keepdims=True)
     e_x = numpy.exp(x - x_max)
     e_x_sum = numpy.sum(e_x, axis=axis, keepdims=True)
-    softmax_x = e_x / e_x_sum
-    return softmax_x
+    return e_x / e_x_sum
 
 
 def split_engine_inputs(
@@ -212,7 +209,7 @@ def split_engine_inputs(
 
     # Check that all inputs have the same batch size
     total_batch_size = items[0].shape[0]
-    if not all(arr.shape[0] == total_batch_size for arr in items):
+    if any(arr.shape[0] != total_batch_size for arr in items):
         raise ValueError("Not all inputs have matching batch size")
 
     batches = []

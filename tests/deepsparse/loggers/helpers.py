@@ -54,7 +54,7 @@ def fetch_leaf_logger(logger: BaseLogger) -> BaseLogger:
     """
     if isinstance(logger, MultiLogger):
         return fetch_leaf_logger(logger.loggers[0])
-    elif isinstance(logger, AsyncLogger) or isinstance(logger, FunctionLogger):
+    elif isinstance(logger, (AsyncLogger, FunctionLogger)):
         return fetch_leaf_logger(logger.logger)
 
     return logger

@@ -59,15 +59,11 @@ class DeepSparseEvaluator(Evaluator):
                 print("Not evaluating epoch 0.")
                 return
         if self.skip_existing:
-            stats_file = output + ".stats.json"
+            stats_file = f"{output}.stats.json"
             if os.path.exists(stats_file):
-                print("Output file {} exists already. Exiting.".format(stats_file))
+                print(f"Output file {stats_file} exists already. Exiting.")
                 return
-            print(
-                "{} not found. Processing: {}".format(
-                    stats_file, network.Factory.checkpoint
-                )
-            )
+            print(f"{stats_file} not found. Processing: {network.Factory.checkpoint}")
 
         # deepsparse edit: allow for passing in a pipeline
         predictor = DeepSparsePredictor(
@@ -108,7 +104,7 @@ class DeepSparseEvaluator(Evaluator):
         stats = dict(**metric_stats, **additional_data)
 
         # write stats file
-        with open(output + ".stats.json", "w") as f:
+        with open(f"{output}.stats.json", "w") as f:
             json.dump(stats, f)
 
         LOG.info("stats:\n%s", json.dumps(stats, indent=4))

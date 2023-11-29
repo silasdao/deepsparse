@@ -166,14 +166,14 @@ class ORTEngine(object):
         """
         :return: Unambiguous representation of the current model instance
         """
-        return "{}({})".format(self.__class__, self._properties_dict())
+        return f"{self.__class__}({self._properties_dict()})"
 
     def __str__(self):
         """
         :return: Human readable form of the current model instance
         """
         formatted_props = [
-            "\t{}: {}".format(key, val) for key, val in self._properties_dict().items()
+            f"\t{key}: {val}" for key, val in self._properties_dict().items()
         ]
 
         return "{}:\n{}".format(
@@ -282,7 +282,7 @@ class ORTEngine(object):
         """
         if val_inp:
             self._validate_inputs(inp)
-        inputs_dict = {name: value for name, value in zip(self.input_names, inp)}
+        inputs_dict = dict(zip(self.input_names, inp))
         return self._eng_net.run(self.output_names, inputs_dict)
 
     def timed_run(
@@ -332,15 +332,12 @@ class ORTEngine(object):
 
     def _validate_inputs(self, inp: List[numpy.ndarray]):
         if isinstance(inp, str) or not isinstance(inp, List):
-            raise ValueError("inp must be a list, given {}".format(type(inp)))
+            raise ValueError(f"inp must be a list, given {type(inp)}")
 
         for arr in inp:
             if arr.shape[0] != self._batch_size:
                 raise ValueError(
-                    (
-                        "array batch size of {} must match the batch size "
-                        "the model was instantiated with {}"
-                    ).format(arr.shape[0], self._batch_size)
+                    f"array batch size of {arr.shape[0]} must match the batch size the model was instantiated with {self._batch_size}"
                 )
 
             if not arr.flags["C_CONTIGUOUS"]:

@@ -83,9 +83,7 @@ ner_tag_map = {
 def _load_tweets(tweets_file: str):
     tweets = []
     with open(tweets_file, "r") as file:
-        for line in file.readlines():
-            tweets.append(json.loads(line))
-
+        tweets.extend(json.loads(line) for line in file)
     return tweets
 
 
@@ -100,8 +98,8 @@ def _batched_model_input(tweets: List[str], batch_size: int) -> Optional[List[st
     if batch_size > len(tweets):
         return None
 
-    batched = tweets[0:batch_size]
-    del tweets[0:batch_size]
+    batched = tweets[:batch_size]
+    del tweets[:batch_size]
 
     return batched
 

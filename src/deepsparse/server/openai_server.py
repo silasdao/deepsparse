@@ -314,9 +314,7 @@ def create_stream_response_json(
         model=pipeline.model_path,
         choices=[choice_data],
     )
-    response_json = response.json(ensure_ascii=False)
-
-    return response_json
+    return response.json(ensure_ascii=False)
 
 
 async def completion_stream_generator(

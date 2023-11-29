@@ -394,8 +394,8 @@ class QuestionAnsweringPipeline(TransformersPipeline):
 
         # Add back the minimum null prediction if it was removed because of its
         # low score.
-        if self.version_2_with_negative and not any(
-            p["offsets"] == (0, 0) for p in predictions
+        if self.version_2_with_negative and all(
+            p["offsets"] != (0, 0) for p in predictions
         ):
             predictions.append(min_null_prediction)
 
@@ -508,54 +508,53 @@ class QuestionAnsweringPipeline(TransformersPipeline):
             raise ValueError(
                 "This example script only works for models that have a fast tokenizer."
             )
-        else:
-            pad_on_right = self.tokenizer.padding_side == "right"
-            tokenized_example = self.tokenizer(
-                text=example.question_text if pad_on_right else example.context_text,
-                text_pair=(
-                    example.context_text if pad_on_right else example.question_text
-                ),
-                truncation="only_second" if pad_on_right else "only_first",
-                max_length=self.sequence_length,
-                stride=self.doc_stride,
-                return_token_type_ids=True,
-                return_overflowing_tokens=True,
-                return_offsets_mapping=True,
-                return_special_tokens_mask=True,
-                padding="max_length" if self.pad_to_max_length else False,
-            )
+        pad_on_right = self.tokenizer.padding_side == "right"
+        tokenized_example = self.tokenizer(
+            text=example.question_text if pad_on_right else example.context_text,
+            text_pair=(
+                example.context_text if pad_on_right else example.question_text
+            ),
+            truncation="only_second" if pad_on_right else "only_first",
+            max_length=self.sequence_length,
+            stride=self.doc_stride,
+            return_token_type_ids=True,
+            return_overflowing_tokens=True,
+            return_offsets_mapping=True,
+            return_special_tokens_mask=True,
+            padding="max_length" if self.pad_to_max_length else False,
+        )
 
-            # For evaluation, we will need to convert our predictions to substrings of
-            # the context, so we keep the corresponding example_id and we will store
-            # the offset mappings.
-            tokenized_example["example_id"] = []
+        # For evaluation, we will need to convert our predictions to substrings of
+        # the context, so we keep the corresponding example_id and we will store
+        # the offset mappings.
+        tokenized_example["example_id"] = []
 
-            n_spans = len(tokenized_example["input_ids"])
-            for span in range(n_spans):
-                # Grab the sequence corresponding to that example
-                # (to know what is the context and what is the question).
-                sequence_ids = tokenized_example.sequence_ids(span)
-                context_index = 1 if pad_on_right else 0
+        n_spans = len(tokenized_example["input_ids"])
+        for span in range(n_spans):
+            # Grab the sequence corresponding to that example
+            # (to know what is the context and what is the question).
+            sequence_ids = tokenized_example.sequence_ids(span)
+            context_index = 1 if pad_on_right else 0
 
-                # Set to None the offset_mapping that are not part of the context so
-                # it's easy to determine if a token position is part of the
-                # context or not
-                tokenized_example["offset_mapping"][span] = [
-                    (ofmap if sequence_ids[key] == context_index else None)
-                    for key, ofmap in enumerate(
-                        tokenized_example["offset_mapping"][span]
-                    )
-                ]
+            # Set to None the offset_mapping that are not part of the context so
+            # it's easy to determine if a token position is part of the
+            # context or not
+            tokenized_example["offset_mapping"][span] = [
+                (ofmap if sequence_ids[key] == context_index else None)
+                for key, ofmap in enumerate(
+                    tokenized_example["offset_mapping"][span]
+                )
+            ]
 
-                tokenized_example["example_id"].append(example.qas_id)
+            tokenized_example["example_id"].append(example.qas_id)
 
-            if self._num_spans is not None:
-                tokenized_example = {
-                    k: tokenized_example[k][: self._num_spans]
-                    for k in tokenized_example.keys()
-                }
+        if self._num_spans is not None:
+            tokenized_example = {
+                k: tokenized_example[k][: self._num_spans]
+                for k in tokenized_example.keys()
+            }
 
-            return tokenized_example
+        return tokenized_example
 
     def _save_predictions(self, all_predictions, all_nbest_json, scores_diff_json):
         if not os.path.exists(self.output_dir):

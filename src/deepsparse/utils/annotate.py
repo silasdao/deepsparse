@@ -372,14 +372,12 @@ def annotate(
     if target_fps is None and calc_fps:
         target_fps = 1 / (time.perf_counter() - start)
 
-    result = annotation_func(
+    return annotation_func(
         image=original_image,
         prediction=pipeline_output,
         images_per_sec=target_fps,
         **kwargs,
     )
-
-    return result
 
 
 class WebcamLoader:

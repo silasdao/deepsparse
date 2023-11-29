@@ -209,9 +209,6 @@ class DecoderKVCache:
                 state, num_additional_entries=abs(capacity_difference)
             )
             self._state = state
-        else:
-            pass
-
         return
 
     def _expand_capacity(

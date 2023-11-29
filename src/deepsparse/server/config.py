@@ -212,8 +212,7 @@ class ServerConfig(BaseModel):
                 continue
             if name in name_list:
                 raise ValueError(
-                    "Endpoint names must be unique if specified. "
-                    "Found a duplicated endpoint name: {}".format(name)
+                    f"Endpoint names must be unique if specified. Found a duplicated endpoint name: {name}"
                 )
             name_list.append(name)
         return endpoints
@@ -314,12 +313,11 @@ def _unpack_nlp_bucketing(cfg: SequenceLengthsConfig):
         raise ValueError("Must specify at least one sequence length under bucketing")
 
     if len(cfg.sequence_lengths) == 1:
-        input_shapes = None
         kwargs = {"sequence_length": cfg.sequence_lengths[0]}
     else:
-        input_shapes = None
         kwargs = {"sequence_length": cfg.sequence_lengths}
 
+    input_shapes = None
     return input_shapes, kwargs
 
 
@@ -327,13 +325,12 @@ def _unpack_cv_bucketing(cfg: ImageSizesConfig):
     if len(cfg.image_sizes) == 0:
         raise ValueError("Must specify at least one image size under bucketing")
 
-    if len(cfg.image_sizes) == 1:
-        # NOTE: convert from List[Tuple[int, int]] to List[List[int]]
-        input_shapes = [list(cfg.image_sizes[0])]
-        kwargs = {}
-    else:
+    if len(cfg.image_sizes) != 1:
         raise NotImplementedError(
             "Multiple image size buckets is currently unsupported"
         )
 
+    # NOTE: convert from List[Tuple[int, int]] to List[List[int]]
+    input_shapes = [list(cfg.image_sizes[0])]
+    kwargs = {}
     return input_shapes, kwargs

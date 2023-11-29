@@ -58,7 +58,7 @@ class SagemakerServer(DeepsparseServer):
         if hasattr(pipeline.input_schema, "from_files"):
             routes_and_fns.append(
                 (
-                    route + "/from_files",
+                    f"{route}/from_files",
                     partial(
                         Server.predict_from_files,
                         ProxyPipeline(pipeline),
@@ -89,9 +89,6 @@ class SagemakerServer(DeepsparseServer):
     def _add_status_and_metadata_endpoints(
         self, app: FastAPI, endpoint_config: EndpointConfig, pipeline: Pipeline
     ):
-        routes_and_fns = []
-        meta_and_fns = []
-
         if endpoint_config.route:
             endpoint_config.route = self.clean_up_route(endpoint_config.route)
             route_ready = f"/invocations{endpoint_config.route}/ready"
@@ -100,11 +97,10 @@ class SagemakerServer(DeepsparseServer):
             route_ready = f"/invocations/{endpoint_config.name}/ready"
             route_meta = f"/invocations/{endpoint_config.name}"
 
-        routes_and_fns.append((route_ready, Server.pipeline_ready))
-        meta_and_fns.append(
+        routes_and_fns = [(route_ready, Server.pipeline_ready)]
+        meta_and_fns = [
             (route_meta, partial(Server.model_metadata, ProxyPipeline(pipeline)))
-        )
-
+        ]
         self._update_routes(
             app=app,
             routes_and_fns=meta_and_fns,

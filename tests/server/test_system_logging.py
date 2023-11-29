@@ -166,7 +166,7 @@ def _test_additional_items_to_log(calls, num_iterations):
 def test_log_resource_utilization(num_iterations, additional_items_to_log):
     server_logger = ListLogger()
 
-    for iter in range(num_iterations):
+    for _ in range(num_iterations):
         log_resource_utilization(
             server_logger, prefix="resource_utilization", **additional_items_to_log
         )

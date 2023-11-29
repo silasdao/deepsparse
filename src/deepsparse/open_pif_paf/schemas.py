@@ -73,8 +73,7 @@ class OpenPifPafFields(BaseModel):
             )
 
         files_numpy = [numpy.array(Image.open(file)) for file in files]
-        input_schema = cls(*args, images=files_numpy, **kwargs)
-        return input_schema
+        return cls(*args, images=files_numpy, **kwargs)
 
     class Config:
         arbitrary_types_allowed = True

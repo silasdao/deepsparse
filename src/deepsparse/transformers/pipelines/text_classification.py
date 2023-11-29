@@ -200,14 +200,13 @@ class TextClassificationPipeline(TransformersPipeline):
             )
 
         if args:
-            if len(args) == 1:
-                # passed input_schema schema directly
-                if isinstance(args[0], self.input_schema):
-                    return args[0]
-                return self.input_schema(sequences=args[0])
-            else:
+            if len(args) != 1:
                 return self.input_schema(sequences=args)
 
+            # passed input_schema schema directly
+            if isinstance(args[0], self.input_schema):
+                return args[0]
+            return self.input_schema(sequences=args[0])
         return self.input_schema(**kwargs)
 
     def process_inputs(self, inputs: TextClassificationInput) -> List[numpy.ndarray]:

@@ -479,8 +479,8 @@ class HaystackPipeline(Pipeline):
         # :return: merged arguments from both inputs
 
         # check for conflicting arguments
-        for key in init_retriever_kwargs.keys():
-            if key in config_retriever_args.keys():
+        for key in init_retriever_kwargs:
+            if key in config_retriever_args:
                 raise ValueError(
                     f"Found {key} in both HaystackPipeline arguments and config "
                     "retriever_args. Specify only one"

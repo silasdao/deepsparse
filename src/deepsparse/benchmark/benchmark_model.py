@@ -441,7 +441,7 @@ def benchmark_model(
 
     # Benchmark
     _LOGGER.info(
-        "Starting '{}' performance measurements for {} seconds".format(scenario, time)
+        f"Starting '{scenario}' performance measurements for {time} seconds"
     )
     benchmark_result = model_stream_benchmark(
         model,
@@ -473,7 +473,7 @@ def benchmark_model(
 
     # Export results
     if export_path:
-        _LOGGER.info("Saving benchmark results to JSON file at {}".format(export_path))
+        _LOGGER.info(f"Saving benchmark results to JSON file at {export_path}")
         with open(export_path, "w") as out:
             json.dump(export_dict, out, indent=2)
     return export_dict
@@ -502,12 +502,12 @@ def main():
     )
 
     # Results summary
-    print("Original Model Path: {}".format(args.model_path))
-    print("Batch Size: {}".format(args.batch_size))
+    print(f"Original Model Path: {args.model_path}")
+    print(f"Batch Size: {args.batch_size}")
     if args.sequence_length:
-        print("Sequence Length: {}".format(args.sequence_length))
-        print("Input IDs Length: {}".format(args.input_ids_length))
-    print("Scenario: {}".format(args.scenario))
+        print(f"Sequence Length: {args.sequence_length}")
+        print(f"Input IDs Length: {args.input_ids_length}")
+    print(f"Scenario: {args.scenario}")
     print(
         "Throughput (items/sec): {:.4f}".format(
             result["benchmark_result"]["items_per_sec"]
@@ -518,7 +518,7 @@ def main():
         "Latency Median (ms/batch): {:.4f}".format(result["benchmark_result"]["median"])
     )
     print("Latency Std (ms/batch): {:.4f}".format(result["benchmark_result"]["std"]))
-    print("Iterations: {}".format(int(result["benchmark_result"]["iterations"])))
+    print(f'Iterations: {int(result["benchmark_result"]["iterations"])}')
 
 
 if __name__ == "__main__":

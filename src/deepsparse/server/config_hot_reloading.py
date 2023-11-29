@@ -75,7 +75,7 @@ def _diff_generator(
        every content change.
     """
     content = _ContentMonitor(config_path)
-    versions_dir = Path(config_path + ".versions")
+    versions_dir = Path(f"{config_path}.versions")
 
     version = 0
 

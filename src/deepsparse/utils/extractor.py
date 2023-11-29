@@ -64,13 +64,8 @@ class Extractor:
         io_names_to_keep = s_io_names_to_extract & original_io_names
         new_io_names_to_add = s_io_names_to_extract - original_io_names
 
-        new_io_tensors = []
-        for name in io_names_to_keep:
-            new_io_tensors.append(original_io_map[name])
-        for name in new_io_names_to_add:
-            # activation become input or output
-            new_io_tensors.append(self.vimap[name])
-
+        new_io_tensors = [original_io_map[name] for name in io_names_to_keep]
+        new_io_tensors.extend(self.vimap[name] for name in new_io_names_to_add)
         # adjust sequence
         new_io_tensors_map = self._build_name2obj_dict(new_io_tensors)
         return [new_io_tensors_map[name] for name in io_names_to_extract]
@@ -106,12 +101,10 @@ class Extractor:
         input_names: List[str],
         output_names: List[str],
     ) -> List[NodeProto]:
-        reachable_nodes = list()  # type: ignore
+        reachable_nodes = []
         for name in output_names:
             self._dfs_search_reachable_nodes(name, input_names, reachable_nodes)
-        # needs to be topology sorted.
-        nodes = [n for n in self.graph.node if n in reachable_nodes]
-        return nodes
+        return [n for n in self.graph.node if n in reachable_nodes]
 
     def _collect_referred_local_functions(
         self,
@@ -199,11 +192,9 @@ class Extractor:
         nodes = self._collect_reachable_nodes(input_names, output_names)
         initializer, value_info = self._collect_reachable_tensors(nodes)
         local_functions = self._collect_referred_local_functions(nodes)
-        model = self._make_model(
+        return self._make_model(
             nodes, inputs, outputs, initializer, value_info, local_functions
         )
-
-        return model
 
 
 def extract_model(

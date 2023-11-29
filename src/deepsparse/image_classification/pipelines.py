@@ -95,10 +95,8 @@ class ImageClassificationPipeline(Pipeline):
             [
                 transforms.Resize(
                     tuple(
-                        [
-                            round(non_rand_resize_scale * size)
-                            for size in self._image_size
-                        ]
+                        round(non_rand_resize_scale * size)
+                        for size in self._image_size
                     )
                 ),
                 transforms.CenterCrop(self._image_size),

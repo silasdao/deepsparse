@@ -263,7 +263,7 @@ class SupportedTasks:
             such as question_answering
         :return: True if it is an nlp task, False otherwise
         """
-        return any([nlp_task.matches(task) for nlp_task in cls.nlp])
+        return any(nlp_task.matches(task) for nlp_task in cls.nlp)
 
     @classmethod
     def is_cv(cls, task: str) -> bool:
@@ -282,7 +282,7 @@ class SupportedTasks:
             classification task
         :return: True if it is an image classification task, False otherwise
         """
-        return any([ic_task.matches(task) for ic_task in cls.image_classification])
+        return any(ic_task.matches(task) for ic_task in cls.image_classification)
 
     @classmethod
     def is_yolo(cls, task: str) -> bool:
@@ -291,7 +291,7 @@ class SupportedTasks:
             segmentation task using YOLO
         :return: True if it is an segmentation task using YOLO, False otherwise
         """
-        return any([yolo_task.matches(task) for yolo_task in cls.yolo])
+        return any(yolo_task.matches(task) for yolo_task in cls.yolo)
 
     @classmethod
     def is_yolov8(cls, task: str) -> bool:
@@ -300,7 +300,7 @@ class SupportedTasks:
             segmentation task using YOLOv8
         :return: True if it is an segmentation task using YOLOv8, False otherwise
         """
-        return any([yolov8_task.matches(task) for yolov8_task in cls.yolov8])
+        return any(yolov8_task.matches(task) for yolov8_task in cls.yolov8)
 
     @classmethod
     def is_yolact(cls, task: str) -> bool:
@@ -309,7 +309,7 @@ class SupportedTasks:
             segmentation task using YOLO
         :return: True if it is an segmentation task using YOLO, False otherwise
         """
-        return any([yolact_task.matches(task) for yolact_task in cls.yolact])
+        return any(yolact_task.matches(task) for yolact_task in cls.yolact)
 
     @classmethod
     def is_haystack(cls, task: str) -> bool:
@@ -317,7 +317,7 @@ class SupportedTasks:
         :param task: the name of the task to check whether it is a haystack task
         :return: True if it is a haystack task, False otherwise
         """
-        return any([haystack_task.matches(task) for haystack_task in cls.haystack])
+        return any(haystack_task.matches(task) for haystack_task in cls.haystack)
 
     @classmethod
     def is_embedding_extraction(cls, task):
@@ -378,7 +378,7 @@ def dynamic_import_task(module_or_path: str) -> str:
     :return: The task from the imported module.
     """
     parent_dir, module_name = _split_dir_and_name(module_or_path)
-    if not os.path.exists(os.path.join(parent_dir, module_name + ".py")):
+    if not os.path.exists(os.path.join(parent_dir, f"{module_name}.py")):
         raise FileNotFoundError(
             f"Unable to find file for {module_or_path}. "
             f"Looked for {module_name}.py under {parent_dir if parent_dir else '.'}"

@@ -116,7 +116,7 @@ def finalize_identifier(
             # remove the square brackets:
             remainder = remainder.split("[")[0]
         # join the identifier and remainder
-        identifier += "." + remainder
+        identifier += f".{remainder}"
 
     if category == MetricCategories.DATA:
         # if the category is DATA, add the function name to the identifier
@@ -253,11 +253,9 @@ def _check_square_brackets(sub_remainder: str) -> Tuple[str, str]:
     # 1. the sub_remainder string
     # 2. a list of consecutive indexing/slicing operations
     sub_remainder, *square_brackets = sub_remainder.split("[")
-    # join the list of consecutive indexing/slicing operations
-    square_brackets = ",".join(
+    if square_brackets := ",".join(
         [re.search(r"(.*?)\]", x).group(1) for x in square_brackets]
-    )
-    if square_brackets:
+    ):
         # "some_value[0,2:4]" -> ("0,2:4", "some_value")
         # "some_value[0][1:3]" -> ("0,1:3", "some_value")
         return square_brackets, sub_remainder
@@ -333,7 +331,7 @@ def check_identifier_match(
         - a boolean (True if match, False otherwise)
         - an optional remainder (string if matched, None otherwise)
     """
-    if template[:3] == "re:":
+    if template.startswith("re:"):
         pattern = template[3:]
         return re.match(pattern, identifier) is not None, None
 
@@ -382,7 +380,8 @@ def _get_function_and_function_name_from_framework(
 
 
 def _warn_if_array_or_tensor(value: Any) -> Any:
-    msg = """
+    if isinstance(value, numpy.ndarray) or hasattr(value, "numpy"):
+        msg = """
     If value is an array or tensor, one should refrain from 
     slicing/indexing/accessing its elements using 'access_nested_value'.
     This function should only be used for Sequence types 
@@ -390,5 +389,4 @@ def _warn_if_array_or_tensor(value: Any) -> Any:
     For more complex operations on `value`, one should use `metric_functions`
     specified directly in the data logging config"""  # noqa W291
 
-    if isinstance(value, numpy.ndarray) or hasattr(value, "numpy"):
         warnings.warn(msg)

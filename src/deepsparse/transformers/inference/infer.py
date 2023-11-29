@@ -243,5 +243,5 @@ def _display_bot_response(stream: bool, response):
         print(response.generations[0].text)
 
 
-if "__main__" == __name__:
+if __name__ == "__main__":
     main()

@@ -181,11 +181,10 @@ def multistream_benchmark(
     :param num_streams: number of threads to launch
     """
     max_time = time.perf_counter() + seconds_to_run
-    threads = []
-
-    for thread in range(num_streams):
-        threads.append(PipelineExecutorThread(pipeline, inputs, max_time))
-
+    threads = [
+        PipelineExecutorThread(pipeline, inputs, max_time)
+        for _ in range(num_streams)
+    ]
     for thread in threads:
         thread.start()  # triggers PipelineExecutorThread.run()
 
@@ -302,12 +301,7 @@ def benchmark_pipeline(
         pipeline.timer_manager.clear()
         start_time = time.perf_counter()
         singlestream_benchmark(pipeline, inputs, seconds_to_run)
-    elif scenario == "multistream":
-        multistream_benchmark(pipeline, inputs, warmup_time, num_streams)
-        pipeline.timer_manager.clear()
-        start_time = time.perf_counter()
-        multistream_benchmark(pipeline, inputs, seconds_to_run, num_streams)
-    elif scenario == "elastic":
+    elif scenario in ["multistream", "elastic"]:
         multistream_benchmark(pipeline, inputs, warmup_time, num_streams)
         pipeline.timer_manager.clear()
         start_time = time.perf_counter()
@@ -336,14 +330,13 @@ def calculate_statistics(
     }
 
     scaled_runtime = total_run_time_ms * num_streams
-    benchmark_dict = {
+    return {
         "total_percentage": sum(batch_times_ms) / scaled_runtime * 100,
         "median": numpy.median(batch_times_ms),
         "mean": numpy.mean(batch_times_ms),
         "std": numpy.std(batch_times_ms),
         **percentiles_dict,
     }
-    return benchmark_dict
 
 
 def calculate_section_stats(
@@ -481,10 +474,10 @@ def main(
 ):
     config = parse_input_config(input_config)
 
-    _LOGGER.info("Original Model Path: %s" % model_path)
-    _LOGGER.info("Task: %s" % task_name)
+    _LOGGER.info(f"Original Model Path: {model_path}")
+    _LOGGER.info(f"Task: {task_name}")
     _LOGGER.info("Batch Size: %d" % batch_size)
-    _LOGGER.info("Scenario: %s" % scenario)
+    _LOGGER.info(f"Scenario: {scenario}")
     _LOGGER.info("Requested Run Time(sec): %d" % run_time)
 
     batch_times, total_run_time, num_streams = benchmark_pipeline(
@@ -525,17 +518,15 @@ def main(
         "benchmark_results": benchmark_results,
     }
 
-    # Export results
-    export_path = export_path
-    if export_path:
-        _LOGGER.info("Saving benchmark results to JSON file at %s" % export_path)
+    if export_path := export_path:
+        _LOGGER.info(f"Saving benchmark results to JSON file at {export_path}")
         with open(export_path, "w") as out:
             json.dump(export_dict, out, indent=2)
 
     # Results summary
-    print("Original Model Path: %s" % model_path)
+    print(f"Original Model Path: {model_path}")
     print("Batch Size: %d" % batch_size)
-    print("Scenario: %s" % scenario)
+    print(f"Scenario: {scenario}")
     print("Iterations: %d" % int(benchmark_results["iterations"]))
     print("Total Runtime: %.4f" % total_run_time)
     print("Throughput (items/sec): %.4f" % benchmark_results["items_per_sec"])

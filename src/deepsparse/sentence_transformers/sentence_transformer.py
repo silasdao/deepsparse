@@ -126,11 +126,11 @@ class SentenceTransformer:
             model_inputs = self.tokenize(sentences_batch)
             model_output = self.model(**model_inputs)
 
-            out_features = {}
-            out_features["sentence_embedding"] = self.mean_pooling(
-                model_output, model_inputs["attention_mask"]
-            )
-
+            out_features = {
+                "sentence_embedding": self.mean_pooling(
+                    model_output, model_inputs["attention_mask"]
+                )
+            }
             embeddings = []
             if output_value == "token_embeddings":
                 for token_emb, attention in zip(
@@ -187,7 +187,7 @@ class SentenceTransformer:
         elif len(text) == 0 or isinstance(text[0], int):  # Empty string or list of ints
             return len(text)
         else:
-            return sum([len(t) for t in text])  # Sum of length of individual strings
+            return sum(len(t) for t in text)
 
     def tokenize(self, texts: Union[List[str], List[Dict], List[Tuple[str, str]]]):
         """

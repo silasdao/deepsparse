@@ -211,10 +211,9 @@ def test_build_system_loggers(
     system_logging_config = system_logging_config_to_groups(system_logging_config)
     system_loggers = build_system_loggers(leaf_loggers, system_logging_config)
 
-    assert (
-        set([logger.target_identifier for logger in system_loggers])
-        == expected_target_identifiers
-    )
+    assert {
+        logger.target_identifier for logger in system_loggers
+    } == expected_target_identifiers
     assert [
         len(system_logger.logger.loggers) for system_logger in system_loggers
     ] == number_leaf_loggers_per_system_logger

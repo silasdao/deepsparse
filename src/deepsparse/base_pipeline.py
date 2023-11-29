@@ -304,7 +304,7 @@ class BasePipeline(ABC):
         """
         return self._alias
 
-    def to_config(self) -> "PipelineConfig":  # noqa: F821
+    def to_config(self) -> "PipelineConfig":    # noqa: F821
         """
         :return: PipelineConfig that can be used to reload this object
         """
@@ -318,12 +318,11 @@ class BasePipeline(ABC):
                 "task"
             )
 
-        # parse any additional properties as kwargs
-        kwargs = {}
-        for attr_name, attr in self.__class__.__dict__.items():
-            if isinstance(attr, property) and attr_name not in dir(PipelineConfig):
-                kwargs[attr_name] = getattr(self, attr_name)
-
+        kwargs = {
+            attr_name: getattr(self, attr_name)
+            for attr_name, attr in self.__class__.__dict__.items()
+            if isinstance(attr, property) and attr_name not in dir(PipelineConfig)
+        }
         return PipelineConfig(
             task=self.task,
             alias=self.alias,

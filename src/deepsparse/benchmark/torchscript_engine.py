@@ -71,7 +71,7 @@ def _validate_batch_size(batch_size: int) -> int:
 
 
 def _select_device(device: str):
-    device = str(device).lower()
+    device = device.lower()
     if device == "cuda":
         if torch.cuda.is_available():
             return "cuda"
@@ -148,14 +148,14 @@ class TorchScriptEngine(object):
         """
         :return: Unambiguous representation of the current model instance
         """
-        return "{}({})".format(self.__class__, self._properties_dict())
+        return f"{self.__class__}({self._properties_dict()})"
 
     def __str__(self):
         """
         :return: Human readable form of the current model instance
         """
         formatted_props = [
-            "\t{}: {}".format(key, val) for key, val in self._properties_dict().items()
+            f"\t{key}: {val}" for key, val in self._properties_dict().items()
         ]
 
         return "{}:\n{}".format(

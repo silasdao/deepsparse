@@ -96,11 +96,7 @@ def main(
     summary.pretty_print()
 
     if compare is not None:
-        if "," in compare:
-            compare = compare.split(",")
-        else:
-            compare = [compare]
-
+        compare = compare.split(",") if "," in compare else [compare]
         print("Comparison Analysis:")
         for model_to_compare in compare:
             compare_model_analysis = ModelAnalysis.create(model_to_compare)
@@ -180,7 +176,7 @@ def run_benchmark_and_analysis(
         sparsity=sparsity,
         quantization=quantization,
     )
-    results = BenchmarkResult(
+    return BenchmarkResult(
         setup=scenario,
         imposed_sparsification=imposed_sparsification,
         items_per_second=items_per_second,
@@ -188,7 +184,6 @@ def run_benchmark_and_analysis(
         node_timings=node_timings,
         supported_graph_percentage=supported_graph_percentage or 0.0,
     )
-    return results
 
 
 def _get_node_timings_from_analysis_results(

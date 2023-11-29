@@ -70,7 +70,7 @@ def test_function_logger(
         "token_classification", batch_size=1, logger=function_logger
     )
     all_messages = []
-    for iter in range(num_iterations):
+    for _ in range(num_iterations):
         pipeline("all_your_base_are_belong_to_us")
         all_messages += [
             message for message in capsys.readouterr().out.split("\n") if message != ""

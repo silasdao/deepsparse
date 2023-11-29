@@ -132,36 +132,10 @@ def test_access_nested_value(value, square_brackets, expected_value):
     )
 
 
-@pytest.mark.parametrize(
-    "value, expected_result",
-    [
-        (10, set([("", 10)])),
-        (
-            {"level_1a": 1, "level_1b": BatchResult([1, 2, 3])},
-            set([("level_1a", 1), ("level_1b", 1), ("level_1b", 2), ("level_1b", 3)]),
-        ),
-        (
-            {"level_1a": {"level_2a": 1, "level_2b": 2}, "level_1b": 2},
-            set(
-                [("level_1a__level_2a", 1), ("level_1a__level_2b", 2), ("level_1b", 2)]
-            ),
-        ),
-        (
-            {
+@pytest.mark.parametrize("value, expected_result", [(10, {("", 10)}), ({"level_1a": 1, "level_1b": BatchResult([1, 2, 3])}, {("level_1a", 1), ("level_1b", 1), ("level_1b", 2), ("level_1b", 3)}), ({"level_1a": {"level_2a": 1, "level_2b": 2}, "level_1b": 2}, {("level_1a__level_2a", 1), ("level_1a__level_2b", 2), ("level_1b", 2)}), ({
                 "level_1a": {"level_2a": 1, "level_2b": 2},
                 "level_1b": {"level_2a": {"level_3a": 1, "level_3b": 2}},
-            },
-            set(
-                [
-                    ("level_1a__level_2a", 1),
-                    ("level_1a__level_2b", 2),
-                    ("level_1b__level_2a__level_3a", 1),
-                    ("level_1b__level_2a__level_3b", 2),
-                ]
-            ),
-        ),
-    ],
-)
+            }, {("level_1a__level_2a", 1), ("level_1a__level_2b", 2), ("level_1b__level_2a__level_3a", 1), ("level_1b__level_2a__level_3b", 2)})])
 def test_unwrap_logs_dictionary(value, expected_result):
-    result = set(result for result in unwrap_logged_value(value))
+    result = set(unwrap_logged_value(value))
     assert result == expected_result

@@ -135,9 +135,7 @@ def decide_thread_pinning(pinning_mode: str):
         _LOGGER.info("Thread pinning disabled, performance may be sub-optimal")
     else:
         _LOGGER.info(
-            "Received invalid option for thread_pinning '{}', skipping".format(
-                pinning_mode
-            )
+            f"Received invalid option for thread_pinning '{pinning_mode}', skipping"
         )
 
 
@@ -168,7 +166,7 @@ def run(worker_id, args, barrier, cpu_affinity_set, num_streams, results):
     null_file_descriptors = None
     suppress_output = args.quiet and worker_id != 0
     if suppress_output:
-        null_file_descriptors = [os.open(os.devnull, os.O_WRONLY) for x in range(2)]
+        null_file_descriptors = [os.open(os.devnull, os.O_WRONLY) for _ in range(2)]
         std_out_and_err = os.dup(1), os.dup(2)
         os.dup2(null_file_descriptors[0], 1)
         os.dup2(null_file_descriptors[1], 2)
@@ -273,8 +271,8 @@ def main():
         # overhead such as saving timing results for each iteration so it isn't a
         # best case but is a realistic case.
         for i in range(args.num_streams):
-            first_start_time = min([b[0] for b in results[i]])
-            last_end_time = max([b[1] for b in results[i]])
+            first_start_time = min(b[0] for b in results[i])
+            last_end_time = max(b[1] for b in results[i])
             total_time_executing = last_end_time - first_start_time
 
             items_per_sec = (args.batch_size * len(results[i])) / total_time_executing
@@ -302,13 +300,13 @@ def main():
     benchmark_result = benchmark_dict
 
     # Results summary
-    print("Original Model Path: {}".format(orig_model_path))
-    print("Batch Size: {}".format(args.batch_size))
+    print(f"Original Model Path: {orig_model_path}")
+    print(f"Batch Size: {args.batch_size}")
     print("Throughput (items/sec): {:.4f}".format(benchmark_result["items_per_sec"]))
     print("Latency Mean (ms/batch): {:.4f}".format(benchmark_result["mean"]))
     print("Latency Median (ms/batch): {:.4f}".format(benchmark_result["median"]))
     print("Latency Std (ms/batch): {:.4f}".format(benchmark_result["std"]))
-    print("Iterations: {}".format(int(benchmark_result["iterations"])))
+    print(f'Iterations: {int(benchmark_result["iterations"])}')
 
 
 if __name__ == "__main__":

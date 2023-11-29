@@ -72,9 +72,7 @@ from rich import print
 def _load_tweets(tweets_file: str):
     tweets = []
     with open(tweets_file, "r") as file:
-        for line in file.readlines():
-            tweets.append(json.loads(line))
-
+        tweets.extend(json.loads(line) for line in file)
     return tweets
 
 
@@ -89,14 +87,14 @@ def _batched_model_input(tweets: List[str], batch_size: int) -> Optional[List[st
     if batch_size > len(tweets):
         return None
 
-    batched = tweets[0:batch_size]
-    del tweets[0:batch_size]
+    batched = tweets[:batch_size]
+    del tweets[:batch_size]
 
     return batched
 
 
 def _classified_positive(sentiment: str):
-    return sentiment == "LABEL_1" or sentiment == "positive"
+    return sentiment in {"LABEL_1", "positive"}
 
 
 def _display_results(batch, sentiments):
@@ -177,10 +175,10 @@ def analyze_tweets_sentiment(
         times.append(end - start)
 
     num_positive = sum(
-        [1 if _classified_positive(sent) else 0 for sent in tot_sentiments]
+        1 if _classified_positive(sent) else 0 for sent in tot_sentiments
     )
     num_negative = sum(
-        [1 if not _classified_positive(sent) else 0 for sent in tot_sentiments]
+        1 if not _classified_positive(sent) else 0 for sent in tot_sentiments
     )
     print("\n\n\n")
     print("###########################################################################")

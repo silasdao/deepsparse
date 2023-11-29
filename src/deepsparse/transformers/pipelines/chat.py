@@ -55,10 +55,7 @@ class ChatInput(TextGenerationInput):
 
     @validator("session_ids")
     def validate_session_ids(cls, value, values) -> Union[None, List[str]]:
-        # make sure that the that format session_ids confirms with the
-        # rest of the inputs
-        session_ids = validate_session_ids(session_ids=value, other_attributes=values)
-        return session_ids
+        return validate_session_ids(session_ids=value, other_attributes=values)
 
 
 class ChatOutput(TextGenerationOutput):
@@ -233,26 +230,10 @@ class ChatPipeline(TextGenerationPipeline):
         """
         engine = self.engine or self.multitoken_engine
 
-        engine_inputs_no_bos = []
-
-        for idx, name in enumerate(engine.onnx_input_names_no_cache):
-            if name == "input_ids" or "attention_mask":
-                # remove first (bos) token/entry from input_ids
-                engine_input = engine_inputs[idx][:, 1:]
-            elif name == "positions":
-                # remove the last position
-                # e.g. positions = [[0,1,2,3]]
-                # ->   positions = [[0,1,2]]
-                engine_input = engine_inputs[idx][:, :-1]
-            elif name == "causal_mask":
-                # recompute the causal mask
-                input_ids = engine_inputs_no_bos[0]
-                attention_mask = engine_inputs_no_bos[1]
-                engine_input = create_causal_mask(
-                    input_ids=input_ids, attention_mask=attention_mask
-                )
-
-            engine_inputs_no_bos.append(engine_input)
+        engine_inputs_no_bos = [
+            engine_inputs[idx][:, 1:]
+            for idx, name in enumerate(engine.onnx_input_names_no_cache)
+        ]
         # finally add the session id
         engine_inputs_no_bos.append(engine_inputs[-1])
         return engine_inputs_no_bos

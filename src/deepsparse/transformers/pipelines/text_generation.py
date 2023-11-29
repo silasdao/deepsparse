@@ -591,9 +591,7 @@ class TextGenerationPipeline(TransformersPipeline):
 
         generation_config = kwargs.get("generation_config")
         prompts = kwargs.get("prompts")
-        streaming = kwargs.get("streaming")
-
-        if streaming:
+        if streaming := kwargs.get("streaming"):
             return self._stream_engine_outputs(
                 engine_outputs, prompts, generation_config
             )
@@ -768,16 +766,14 @@ class TextGenerationPipeline(TransformersPipeline):
 
                     if self._stop_token_generated(token, stop_tokens=stop):
                         _LOGGER.debug(
-                            "Stop token %s generated. Stopping generation."
-                            % self.tokenizer.decode(token)
+                            f"Stop token {self.tokenizer.decode(token)} generated. Stopping generation."
                         )
                         finished_reason.append(FinishReason.STOP)
                         break
 
                     if callback is not None and callback(token) is False:
                         _LOGGER.debug(
-                            "callback %s returned False, stopping generation."
-                            % callback.__qualname__
+                            f"callback {callback.__qualname__} returned False, stopping generation."
                         )
                         finished_reason.append(FinishReason.CALLBACK)
                         break
@@ -796,40 +792,34 @@ class TextGenerationPipeline(TransformersPipeline):
                     tokens=token_generator.tokens, kv_cache=session
                 )
                 if streaming:
-                    # when no new tokens are generated
-                    if len(finished_reason) == 0:
-                        yield (
-                            numpy.array([generated_tokens]),
-                            numpy.concatenate(generated_logits, axis=1),
-                            [FinishReason.LENGTH],
-                        )
-                    else:
+                    if finished_reason:
                         yield (
                             numpy.array([token]),
                             numpy.array([logits]),
                             [finished_reason[-1]],
                         )
 
+                    else:
+                        yield (
+                            numpy.array([generated_tokens]),
+                            numpy.concatenate(generated_logits, axis=1),
+                            [FinishReason.LENGTH],
+                        )
         if not streaming:
             # when no new tokens are generated
-            if len(finished_reason) == 0:
+            if not finished_reason:
                 finished_reason.append(FinishReason.LENGTH)
 
-            if self._debug:
-                returns = (
-                    numpy.array([generated_tokens]),
-                    numpy.concatenate(generated_logits, axis=1),
-                    finished_reason,
-                    [session],
-                )
-            else:
-                returns = (
-                    numpy.array([generated_tokens]),
-                    numpy.concatenate(generated_logits, axis=1),
-                    finished_reason,
-                )
-
-            yield returns
+            yield (
+                numpy.array([generated_tokens]),
+                numpy.concatenate(generated_logits, axis=1),
+                finished_reason,
+                [session],
+            ) if self._debug else (
+                numpy.array([generated_tokens]),
+                numpy.concatenate(generated_logits, axis=1),
+                finished_reason,
+            )
 
     def prompt_inference(
         self,
@@ -915,9 +905,7 @@ class TextGenerationPipeline(TransformersPipeline):
         engine_inputs = [
             engine_inputs_map[name] for name in self.engine.onnx_input_names_no_cache
         ]
-        generated_logits = self.engine(engine_inputs, kv_cache)
-
-        return generated_logits
+        return self.engine(engine_inputs, kv_cache)
 
     def engine_inputs_for_prefill(
         self, tokens: List[int], kv_cache: DecoderKVCache
@@ -1032,11 +1020,9 @@ class TextGenerationPipeline(TransformersPipeline):
         :param orig_batch_size: The original batch size
         :return: A list of joined outputs
         """
-        streaming = kwargs.get("streaming")
-        if streaming:
+        if streaming := kwargs.get("streaming"):
             for batch in batch_outputs:
-                for outputs in batch:
-                    yield outputs
+                yield from batch
         else:
             batch_outputs = [list(*b) for b in batch_outputs]
             if self._debug:

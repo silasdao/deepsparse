@@ -82,7 +82,7 @@ class architecture(dict):
     def __setattr__(self, name: str, value: Any):
         if name != "__dict__":
             raise AttributeError(
-                "Neural Magic: Architecture: can't modify {} to {}".format(name, value)
+                f"Neural Magic: Architecture: can't modify {name} to {value}"
             )
         else:
             super(architecture, self).__setattr__(name, value)
@@ -147,9 +147,7 @@ def get_darwin_version() -> str:
     """
     If we are running Darwin, get the current version.  Otherwise return None.
     """
-    if sys.platform.startswith("darwin"):
-        return platform.mac_ver()[0]
-    return None
+    return platform.mac_ver()[0] if sys.platform.startswith("darwin") else None
 
 
 def check_darwin_support() -> bool:
@@ -168,8 +166,7 @@ def platform_error_msg() -> str:
     Generate unsupported platform error message.
     """
     darwin_str = f" or MacOS >= {MINIMUM_DARWIN_VERSION}"
-    darwin_ver = get_darwin_version()
-    if darwin_ver:
+    if darwin_ver := get_darwin_version():
         current_os = f"MacOS {darwin_ver}"
     else:
         current_os = sys.platform
@@ -200,24 +197,17 @@ def cpu_architecture() -> architecture:
 
     if isa_type_override and isa_type_override != arch.isa:
         print(
-            "Neural Magic: Using env variable NM_ARCH={} for isa_type".format(
-                isa_type_override
-            )
+            f"Neural Magic: Using env variable NM_ARCH={isa_type_override} for isa_type"
         )
         if isa_type_override not in VALID_VECTOR_EXTENSIONS:
             raise OSError(
-                (
-                    "Neural Magic: Invalid instruction set '{}' must be " "one of {}."
-                ).format(isa_type_override, ",".join(VALID_VECTOR_EXTENSIONS))
+                f"""Neural Magic: Invalid instruction set '{isa_type_override}' must be one of {",".join(VALID_VECTOR_EXTENSIONS)}."""
             )
         arch.override_isa(isa_type_override)
 
     if arch.isa not in VALID_VECTOR_EXTENSIONS:
         raise OSError(
-            (
-                "Neural Magic: Unable to determine instruction set '{}'. This system "
-                "may be unsupported but to try, set NM_ARCH to one of {} to continue."
-            ).format(arch.isa, ",".join(VALID_VECTOR_EXTENSIONS))
+            f"""Neural Magic: Unable to determine instruction set '{arch.isa}'. This system may be unsupported but to try, set NM_ARCH to one of {",".join(VALID_VECTOR_EXTENSIONS)} to continue."""
         )
 
     return arch

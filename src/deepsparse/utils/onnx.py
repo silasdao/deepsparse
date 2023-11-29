@@ -102,7 +102,7 @@ def translate_onnx_type_to_numpy(tensor_type: int):
     :return: Corresponding numpy type
     """
     if tensor_type not in TENSOR_TYPE_TO_NP_TYPE:
-        raise Exception("Unknown ONNX tensor type = {}".format(tensor_type))
+        raise Exception(f"Unknown ONNX tensor type = {tensor_type}")
     return TENSOR_TYPE_TO_NP_TYPE[tensor_type]
 
 
@@ -139,16 +139,13 @@ def model_to_path(model: Union[str, Model, File]) -> str:
         model = model.path
 
     if not isinstance(model, str):
-        raise ValueError("unsupported type for model: {}".format(type(model)))
+        raise ValueError(f"unsupported type for model: {type(model)}")
 
     if not os.path.exists(model):
-        raise ValueError("model path must exist: given {}".format(model))
+        raise ValueError(f"model path must exist: given {model}")
 
     model_path = Path(model)
-    if model_path.is_dir():
-        return str(model_path / _MODEL_DIR_ONNX_NAME)
-
-    return model
+    return str(model_path / _MODEL_DIR_ONNX_NAME) if model_path.is_dir() else model
 
 
 def get_external_inputs(onnx_model: Union[str, ModelProto]) -> List:
@@ -164,10 +161,11 @@ def get_external_inputs(onnx_model: Union[str, ModelProto]) -> List:
     )
     all_inputs = model.graph.input
     initializer_input_names = [node.name for node in model.graph.initializer]
-    external_inputs = [
-        input for input in all_inputs if input.name not in initializer_input_names
+    return [
+        input
+        for input in all_inputs
+        if input.name not in initializer_input_names
     ]
-    return external_inputs
 
 
 def get_external_outputs(onnx_model: Union[str, ModelProto]) -> List:
@@ -181,7 +179,7 @@ def get_external_outputs(onnx_model: Union[str, ModelProto]) -> List:
         if isinstance(onnx_model, ModelProto)
         else onnx.load(onnx_model, load_external_data=False)
     )
-    return [output for output in model.graph.output]
+    return list(model.graph.output)
 
 
 def get_input_names(onnx_filepath: Union[str, ModelProto]) -> List[str]:
@@ -213,7 +211,7 @@ def generate_random_inputs(
     :return: List of random tensors
     """
     input_data_list = []
-    for i, external_input in enumerate(get_external_inputs(onnx_filepath)):
+    for external_input in get_external_inputs(onnx_filepath):
         input_tensor_type = external_input.type.tensor_type
         elem_type = translate_onnx_type_to_numpy(input_tensor_type.elem_type)
         in_shape = [max(int(d.dim_value), 1) for d in input_tensor_type.shape.dim]
@@ -221,14 +219,11 @@ def generate_random_inputs(
         if batch_size is not None:
             in_shape[0] = batch_size
 
-        input_string = "input '{}', type = {}, shape = {}".format(
-            external_input.name, numpy.dtype(elem_type).name, in_shape
-        )
+        input_string = f"input '{external_input.name}', type = {numpy.dtype(elem_type).name}, shape = {in_shape}"
 
-        assert not any(dim < 1 for dim in in_shape), (
-            f"Dynamic shape found in {input_string}. "
-            "All shapes must be non-zero in order to generate random data"
-        )
+        assert all(
+            dim >= 1 for dim in in_shape
+        ), f"Dynamic shape found in {input_string}. All shapes must be non-zero in order to generate random data"
 
         _LOGGER.info(f"Generating {input_string}")
         input_data_list.append(numpy.random.rand(*in_shape).astype(elem_type))
@@ -330,19 +325,13 @@ def override_onnx_input_shapes(
     # Make sure that input shapes can map to the ONNX model
     assert len(external_inputs) == len(
         input_shapes
-    ), "Mismatch of number of model inputs ({}) and override shapes ({})".format(
-        len(external_inputs), len(input_shapes)
-    )
+    ), f"Mismatch of number of model inputs ({len(external_inputs)}) and override shapes ({len(input_shapes)})"
 
     # Overwrite the input shapes of the model
     for input_idx, external_input in enumerate(external_inputs):
         assert len(external_input.type.tensor_type.shape.dim) == len(
             input_shapes[input_idx]
-        ), "Input '{}' shape doesn't match shape override: {} vs {}".format(
-            external_input.name,
-            external_input.type.tensor_type.shape.dim,
-            input_shapes[input_idx],
-        )
+        ), f"Input '{external_input.name}' shape doesn't match shape override: {external_input.type.tensor_type.shape.dim} vs {input_shapes[input_idx]}"
         for dim_idx, dim in enumerate(external_input.type.tensor_type.shape.dim):
             dim.dim_value = input_shapes[input_idx][dim_idx]
 
@@ -527,7 +516,7 @@ def overwrite_onnx_model_inputs_for_kv_cache_models(
             use kv cache, then the data type is None
     """
     model = onnx.load(onnx_file_path, load_external_data=False)
-    initializer_input_names = set(node.name for node in model.graph.initializer)
+    initializer_input_names = {node.name for node in model.graph.initializer}
     external_inputs = [
         inp for inp in model.graph.input if inp.name not in initializer_input_names
     ]
@@ -592,7 +581,7 @@ def has_model_kv_cache(model: Union[str, ModelProto]) -> bool:
     :param model_path: Path to a model or a model proto.
     :return True if the model has a KV cache support, False otherwise.
     """
-    return bool(any(default_cached_outputs(model)))
+    return any(default_cached_outputs(model))
 
 
 def infer_sequence_length(model: Union[str, ModelProto]) -> int:

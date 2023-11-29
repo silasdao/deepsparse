@@ -82,7 +82,7 @@ class YOLOInput(ComputerVisionSchema):
                 "constructing from file(s)"
             )
         files_numpy = [numpy.array(Image.open(file)) for file in files]
-        input_schema = cls(
+        return cls(
             # if the input comes through the client-server communication
             # do not return segmentation masks
             *args,
@@ -90,7 +90,6 @@ class YOLOInput(ComputerVisionSchema):
             return_masks=not from_server,
             **kwargs,
         )
-        return input_schema
 
     class Config:
         arbitrary_types_allowed = True

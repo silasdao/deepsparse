@@ -44,7 +44,7 @@ def init_deepsparse_lib():
             get_neuralmagic_binaries_dir(), "deepsparse_engine.so"
         )
         spec = importlib.util.spec_from_file_location(
-            "deepsparse.{}.deepsparse_engine".format(AVX_TYPE),
+            f"deepsparse.{AVX_TYPE}.deepsparse_engine",
             onnxruntime_neuralmagic_so_path,
         )
         engine = importlib.util.module_from_spec(spec)

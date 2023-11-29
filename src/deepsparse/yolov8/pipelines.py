@@ -84,9 +84,7 @@ class YOLOv8Pipeline(YOLOPipeline):
         if self.subtask == "segmentation":
             if len(engine_outputs) != 2:
                 warnings.warn(
-                    "YOLOv8 Segmentation pipeline expects 2 outputs from engine, "
-                    "got {}. Assuming first output is detection output, and last "
-                    "is segmentation output".format(len(engine_outputs))
+                    f"YOLOv8 Segmentation pipeline expects 2 outputs from engine, got {len(engine_outputs)}. Assuming first output is detection output, and last is segmentation output"
                 )
                 engine_outputs = [engine_outputs[0], engine_outputs[5]]
             return self.process_engine_outputs_seg(
@@ -96,10 +94,7 @@ class YOLOv8Pipeline(YOLOPipeline):
         else:
             if len(engine_outputs) != 1:
                 warnings.warn(
-                    "YOLOv8 Detection pipeline expects 1 output from engine, "
-                    "got {}. Assuming first output is detection output".format(
-                        len(engine_outputs)
-                    )
+                    f"YOLOv8 Detection pipeline expects 1 output from engine, got {len(engine_outputs)}. Assuming first output is detection output"
                 )
                 engine_outputs = [engine_outputs[0]]
 

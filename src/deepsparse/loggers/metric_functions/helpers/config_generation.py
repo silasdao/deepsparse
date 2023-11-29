@@ -146,7 +146,7 @@ def _str_list_to_yaml(list_to_convert: List[str]) -> str:
     lines_indented = [
         textwrap.indent(line, prefix=_WHITESPACE) for line in list_to_convert
     ]
-    lines_leading_coma = ["-" + line[1:] for line in lines_indented]
+    lines_leading_coma = [f"-{line[1:]}" for line in lines_indented]
     return ("\n").join(lines_leading_coma)
 
 
@@ -173,9 +173,6 @@ def _metric_function_config_to_string(
         f"frequency: {metric_function_config.frequency}"
     )
 
-    target_loggers = metric_function_config.target_loggers
-    # if target_loggers is not None,
-    # include it in the yaml string
-    if target_loggers:
+    if target_loggers := metric_function_config.target_loggers:
         text += f"\ntarget_loggers:\n{textwrap.indent(_str_list_to_yaml(target_loggers), prefix=_WHITESPACE)}"  # noqa E501
     return text

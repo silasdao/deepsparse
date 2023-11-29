@@ -39,8 +39,9 @@ except Exception as torch_import_err:
 def _get_files(directory: str) -> List[str]:
     list_filepaths = []
     for root, dirs, files in os.walk(directory):
-        for file in files:
-            list_filepaths.append(os.path.join(os.path.abspath(root), file))
+        list_filepaths.extend(
+            os.path.join(os.path.abspath(root), file) for file in files
+        )
     return list_filepaths
 
 
@@ -144,10 +145,7 @@ def torchvision_model_fixture(torchvision_fixture):
         if torchvision_instance:
             model = torchvision_instance.models.resnet50(kwargs)
 
-            if return_jit:
-                return torch.jit.script(model)
-
-            return model
+            return torch.jit.script(model) if return_jit else model
 
     return get
 

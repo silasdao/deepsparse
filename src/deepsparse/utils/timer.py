@@ -344,9 +344,8 @@ class TimerManager:
         """
         if self.current:
             return self.current
-        else:
-            with self.new_timer_context(total_inference=False) as timer:
-                return timer
+        with self.new_timer_context(total_inference=False) as timer:
+            return timer
 
     def clear(self):
         for t in self._timers:

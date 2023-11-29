@@ -127,9 +127,7 @@ def benchmark_sweep(
     """
 
     if not export_csv_path:
-        export_csv_path = "benchmark_sweep_{}.csv".format(
-            time.strftime("%Y%m%d_%H%M%S")
-        )
+        export_csv_path = f'benchmark_sweep_{time.strftime("%Y%m%d_%H%M%S")}.csv'
 
     print(f"Starting benchmarking sweep, writing result to {export_csv_path}")
 
@@ -346,11 +344,7 @@ def main(
     save_dir_path.mkdir(parents=True, exist_ok=True)
 
     for model in models:
-        if model.startswith("zoo:"):
-            model_name = ""
-        else:
-            model_name = Path(model).stem
-
+        model_name = "" if model.startswith("zoo:") else Path(model).stem
         export_csv_name = f'benchmark_{model_name}_{time.strftime("%Y%m%d_%H%M%S")}.csv'
         export_csv_path = save_dir_path / export_csv_name
         benchmark_sweep(
@@ -386,10 +380,7 @@ def _validate_num_cores(num_cores: str):
         cores = cores.strip()
         if not cores:
             continue
-        if cores == "max":
-            new_core_value = cpu_details()[0]
-        else:
-            new_core_value = int(cores.strip())
+        new_core_value = cpu_details()[0] if cores == "max" else int(cores.strip())
         valid_num_cores.append(new_core_value)
     return _remove_duplicates(items=valid_num_cores)
 

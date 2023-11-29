@@ -78,5 +78,5 @@ def test_pipeline_create_dynamic_task():
     path = os.path.abspath(
         "tests/deepsparse/pipelines/dynamic_import_modules/valid_dynamic_import.py"
     )
-    constructor = Pipeline._get_task_constructor("import:" + path)
+    constructor = Pipeline._get_task_constructor(f"import:{path}")
     assert constructor.__name__ == "UnitTestTaskPipeline"

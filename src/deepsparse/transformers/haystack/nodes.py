@@ -122,13 +122,13 @@ class DeepSparseEmbeddingRetriever(EmbeddingRetriever):
 
         self.embedding_encoder = DeepSparseEmbeddingEncoder(self, kwargs)
 
-    def train(*args, **kwargs):
+    def train(self, **kwargs):
         raise NotImplementedError("DeepSparse Engine does not support training")
 
-    def save(*args, **kwargs):
+    def save(self, **kwargs):
         raise NotImplementedError("DeepSparse Engine does not support saving to files")
 
-    def load(*args, **kwargs):
+    def load(self, **kwargs):
         raise NotImplementedError(
             "DeepSparse Engine does not support loading from files"
         )
@@ -290,13 +290,13 @@ class DeepSparseDensePassageRetriever(DensePassageRetriever):
         passage_inputs = [self._document_to_passage_input(doc) for doc in docs]
         return self.passage_pipeline(passage_inputs).embeddings
 
-    def train(*args, **kwargs):
+    def train(self, **kwargs):
         raise NotImplementedError("DeepSparse Engine does not support model training")
 
-    def save(*args, **kwargs):
+    def save(self, **kwargs):
         raise NotImplementedError("DeepSparse Engine does not support saving to files")
 
-    def load(*args, **kwargs):
+    def load(self, **kwargs):
         raise NotImplementedError(
             "DeepSparse Engine does not support loading from files"
         )
@@ -315,7 +315,7 @@ class DeepSparseDensePassageRetriever(DensePassageRetriever):
 
         return document.content
 
-    def _get_predictions(*args, **kwargs):
+    def _get_predictions(self, **kwargs):
         raise NotImplementedError(
             "This helper function is not used by DeepSparseDensePassageRetriever"
         )

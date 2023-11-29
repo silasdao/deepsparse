@@ -59,7 +59,7 @@ def create_docs(src: str, dest: str):
     print("running sphinx-multiversion")
     res = subprocess.run(["sphinx-multiversion", src, dest])
 
-    if not res.returncode == 0:
+    if res.returncode != 0:
         raise Exception(f"{res.stdout} {res.stderr}")
 
     print("completed sphinx build")
@@ -86,9 +86,7 @@ def package_docs(dest: str):
 
 
 def _get_docs_folders(dest: str) -> List[str]:
-    folders = os.listdir(dest)
-
-    return folders
+    return os.listdir(dest)
 
 
 def _get_latest_folder(folders: List[str]) -> str:
